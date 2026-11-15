@@ -1,1418 +1,806 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>📚 📚 Chemistry · Atomic Structure</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atomic Structure — Quiz</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',Roboto,sans-serif;background:#f5f7fb;color:#2d3142;height:100vh;overflow:hidden;display:flex;flex-direction:column;transition:background .2s,color .2s}
+  /* ══════════════ KID-FRIENDLY PALETTE (bright daylight) ══════════════ */
+  :root {
+    --bg: linear-gradient(160deg, #fff8e1 0%, #e0f7fa 60%, #dff4ff 100%);
+    --panel: #ffffff;
+    --ink: #2d3436;
+    --ink-soft: #6b7a85;
+    --coral: #ff6b6b;
+    --sunny: #ffd93d;
+    --teal: #4ecdc4;
+    --sky: #4f9de8;
+    --violet: #9b59b6;
+    --green: #2ecc71;
+    --amber: #ffb300;
+    --red: #ff6b6b;
+    --sidebar-w: 264px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
+  body {
+    background: var(--bg); color: var(--ink); overflow:hidden;
+    font-family: 'Comic Sans MS','Chalkboard SE','Marker Felt','Segoe UI','Trebuchet MS',sans-serif;
+    display:flex;
+  }
 
-/* ============ 顶部条 ============ */
-.topbar{background:#fff;border-bottom:1px solid #e8eaf2;padding:10px 20px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.03)}
-.topbar-row1{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.topbar-row2{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-top:8px;border-top:1px dashed #f0f2f7}
-.topbar h1{font-size:16px;color:#5b8def;white-space:nowrap;font-weight:700}
-.topbar h1 .subtitle{font-size:12px;color:#8a8fa3;font-weight:400;margin-left:6px}
+  /* ── Sidebar tree ── */
+  .sidebar {
+    width: var(--sidebar-w); min-width: var(--sidebar-w); height:100vh;
+    background: rgba(255,255,255,0.82); border-right:1px solid rgba(0,0,0,0.08);
+    display:flex; flex-direction:column; z-index:20; overflow-y:auto;
+    backdrop-filter: blur(4px);
+    transition: transform .3s ease;
+  }
+  .sidebar-header {
+    padding:1.1rem 1rem .8rem; border-bottom:1px solid rgba(0,0,0,0.08);
+    font-size:1.05rem; font-weight:bold; cursor:pointer; display:flex; gap:.4rem; align-items:center;
+    flex-shrink:0;
+  }
+  .sidebar-header .ticker { color:var(--sky); }
+  .tree { flex:1; padding:.5rem 0; overflow-y:auto; }
+  .tree-node {
+    padding:.5rem .8rem .5rem 1rem; cursor:pointer; display:flex; align-items:center; gap:.45rem;
+    font-size:.86rem; transition: background .15s; border-left:3px solid transparent;
+    user-select:none; color:var(--ink);
+  }
+  .tree-node:hover { background:rgba(79,157,232,0.1); }
+  .tree-node.active { border-left-color: var(--amber); background:rgba(255,217,61,0.14); }
+  .tree-node .arrow { font-size:.65rem; width:12px; text-align:center; flex-shrink:0; transition:transform .2s; color:var(--ink-soft); }
+  .tree-node .arrow.open { transform:rotate(90deg); }
+  .tree-node .dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+  .tree-node .badge {
+    margin-left:auto; font-size:.68rem; background:rgba(78,205,196,0.2); color:var(--teal);
+    border-radius:999px; padding:.05rem .5rem; flex-shrink:0;
+  }
+  .tree-children { overflow:hidden; max-height:0; transition:max-height .3s ease; }
+  .tree-children.open { max-height:4000px; }
+  .tree-children .tree-node { padding-left:2.2rem; font-size:.8rem; }
+  .tree-leaf .st {
+    margin-left:auto; font-size:.72rem; width:1.1rem; text-align:center; flex-shrink:0;
+  }
+  .st.good { color:var(--green); }
+  .st.bad { color:var(--red); }
+  .st.slow { color:var(--amber); }
 
-.cat-filter{display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%}
-.cat-filter-label{font-size:12px;color:#8a8fa3;white-space:nowrap;font-weight:600}
-.cat-chip{font-size:12px;padding:4px 12px;border-radius:14px;border:1px solid #e0e3ed;background:#fff;cursor:pointer;user-select:none;transition:all .15s;color:#8a8fa3;white-space:nowrap}
-.cat-chip:hover{border-color:#5b8def}
-.cat-chip.active{background:#5b8def;color:#fff;border-color:#5b8def}
-.cat-chip .chip-count{font-size:10px;opacity:.75;margin-left:4px}
+  /* ── Main column ── */
+  .main { flex:1; display:flex; flex-direction:column; position:relative; z-index:5; min-width:0; }
+  .topbar {
+    padding:.6rem 1.1rem; display:flex; align-items:center; gap:.8rem; flex-shrink:0;
+    background:rgba(255,255,255,0.6); border-bottom:1px solid rgba(0,0,0,0.08);
+  }
+  .topbar .app-title { font-size:1.05rem; font-weight:bold; display:flex; gap:.4rem; align-items:center; }
+  .topbar .spacer { flex:1; }
+  .score-chip {
+    background:#fff; border:2px solid var(--sunny); color:var(--ink); border-radius:999px;
+    padding:.3rem .9rem; font-size:.9rem; font-weight:bold; box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  }
+  .mute-btn {
+    background:#fff; border:2px solid rgba(0,0,0,0.12); border-radius:999px; cursor:pointer;
+    font-size:1rem; padding:.25rem .6rem; font-family:inherit;
+  }
+  .mute-btn:hover { border-color:var(--sky); }
+  .progress-track {
+    height:8px; border-radius:99px; background:rgba(0,0,0,0.08); overflow:hidden; flex:1; max-width:260px;
+  }
+  .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--teal),var(--sky)); border-radius:99px; transition:width .4s ease; }
 
-.stat-filters{display:flex;gap:6px;align-items:center}
-.sf-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;border:1px solid #e0e3ed;background:#fff;cursor:pointer;transition:all .15s;user-select:none;font-size:12px;color:#8a8fa3}
-.sf-btn:hover{border-color:#5b8def}
-.sf-btn .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:opacity .15s}
-.sf-btn .dot.green{background:#52c785}
-.sf-btn .dot.gray{background:#b8bdcc}
-.sf-btn .dot.red{background:#ff7a90}
-.sf-btn .dot.yellow{background:#ffc857}
-.sf-btn .num{font-weight:700;min-width:16px;color:#2d3142}
-.sf-btn.off{opacity:.4}
+  /* ── Stage / views ── */
+  .stage { flex:1; display:flex; justify-content:center; align-content:center; padding:1.4rem; overflow:auto; min-height:0; }
+  .card {
+    background:var(--panel); border-radius:22px; box-shadow:0 14px 44px rgba(45,52,54,0.16);
+    width:100%; max-width:720px; padding:1.8rem 2rem 2rem; position:relative;
+    border:1px solid rgba(0,0,0,0.05); margin:auto;
+  }
 
-.io-btns{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap}
-.io-btns button{font-size:12px;padding:5px 10px;border-radius:7px;border:1px solid #e0e3ed;background:#fff;color:#5b6172;cursor:pointer;transition:all .15s}
-.io-btns button:hover{border-color:#5b8def;color:#5b8def}
-.io-btns button.exam{background:#fef0f3;border-color:#ffd1d9;color:#ff5d77}
-.io-btns button.exam:hover{background:#ff5d77;color:#fff;border-color:#ff5d77}
-.io-btns button.danger:hover{border-color:#ff7a90;color:#ff7a90}
-.io-btns .theme-toggle{padding:5px 9px;border-radius:50%;font-size:14px}
+  /* Intro */
+  .intro { text-align:center; }
+  .intro .big-emoji { font-size:4rem; animation: bob 3s ease-in-out infinite; display:inline-block; }
+  .intro h1 { font-size:2rem; margin:.4rem 0 .3rem; background:linear-gradient(135deg,var(--sky),var(--violet)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .intro .sub { color:var(--ink-soft); margin-bottom:1.2rem; }
+  .intro .meta-chip { color:var(--ink-soft); font-size:.9rem; margin-bottom:1.4rem; }
+  .big-btn {
+    font-family:inherit; font-size:1.15rem; font-weight:bold; color:#fff; cursor:pointer;
+    background:linear-gradient(135deg,var(--green),#27ae60); border:none; border-radius:999px;
+    padding:.85rem 2.2rem; box-shadow:0 6px 18px rgba(46,204,113,0.4); transition:transform .15s, box-shadow .15s;
+  }
+  .big-btn:hover { transform:translateY(-2px); }
+  .big-btn.ghost { background:#fff; color:var(--ink); box-shadow:0 2px 8px rgba(0,0,0,0.1); border:2px solid rgba(0,0,0,0.1); margin-left:.7rem; }
+  .ghost-row { margin-top:1.1rem; display:flex; justify-content:center; gap:.4rem; flex-wrap:wrap; }
+  .hint-line { font-size:.82rem; color:var(--ink-soft); margin-top:1rem; }
 
-/* ============ 主体 ============ */
-.main{display:flex;flex:1;overflow:hidden}
-.left{width:300px;min-width:300px;background:#fff;border-right:1px solid #e8eaf2;display:flex;flex-direction:column;flex-shrink:0}
-.left-header{padding:12px 16px;border-bottom:1px solid #e8eaf2;font-size:13px;color:#8a8fa3;display:flex;justify-content:space-between;align-items:center}
-.left-header .progress{font-weight:700;color:#5b8def}
-.left-scroll{flex:1;overflow-y:auto;padding:6px 0}
-.left-scroll::-webkit-scrollbar{width:6px}
-.left-scroll::-webkit-scrollbar-thumb{background:#d8dce8;border-radius:3px}
+  /* Question */
+  .q-head { display:flex; justify-content:space-between; align-items:center; gap:.6rem; flex-wrap:wrap; }
+  .q-progress { font-size:.82rem; color:var(--ink-soft); font-weight:bold; padding:.2rem 0; }
+  .timer-wrap { position:relative; width:74px; height:74px; flex-shrink:0; }
+  .timer-wrap svg { width:74px; height:74px; transform:rotate(-90deg); }
+  .timer-wrap .circle-bg { fill:none; stroke:rgba(0,0,0,0.08); stroke-width:7; }
+  .timer-wrap .circle-fg { fill:none; stroke:var(--sky); stroke-width:7; stroke-linecap:round; }
+  .timer-wrap .t-count {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:1.5rem; font-weight:bold; color:var(--ink);
+  }
+  .timer-wrap.low .circle-fg { stroke:var(--red); }
+  .timer-wrap.low .t-count { color:var(--red); }
+  .q-text { font-size:1.35rem; line-height:1.45; margin:.7rem 0 1rem; font-weight:bold; }
+  .qimg-wrap { text-align:center; margin:.2rem 0 1rem; }
+  .qimg-wrap img.qimg {
+    max-width:100%; max-height:240px; border-radius:14px; object-fit:contain;
+    border:1px solid rgba(0,0,0,0.08);
+  }
+  .qimg-wrap .emoji-big { font-size:4.2rem; animation: pop 0.5s ease; }
+  .qimg-wrap .caption { font-size:.78rem; color:var(--ink-soft); margin-top:.35rem; }
 
-.cat-group{margin-bottom:2px}
-.cat-top{padding:8px 16px;font-size:13px;font-weight:700;color:#2d3142;background:#fafbfd;display:flex;align-items:center;gap:6px;position:sticky;top:0;z-index:1;border-bottom:1px solid #f0f2f7}
-.cat-count{font-size:11px;color:#a8adbd;font-weight:normal}
-.cat-law{padding:8px 16px 4px 16px;font-size:12px;font-weight:600;color:#5a607a;display:flex;gap:6px;align-items:flex-start;line-height:1.45;border-top:1px solid #f5f6fa}
-.cat-law:first-of-type{border-top:none}
-.cat-law-name{flex:1;word-break:break-word}
-.cat-law-count{font-size:10px;color:#a8adbd;font-weight:normal;background:#f0f2f7;padding:1px 6px;border-radius:8px;flex-shrink:0;margin-top:2px}
-.cat-sub{padding:4px 16px 6px 24px}
-.cat-sub-flat{padding:10px 16px 12px 16px}
-.cat-sub-name{font-size:11px;color:#a8adbd;margin-bottom:5px;line-height:1.4}
-.cat-nums{display:flex;flex-wrap:wrap;gap:3px}
-.qnum{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 6px;border-radius:5px;font-size:12px;cursor:pointer;transition:all .15s;border:1.5px solid transparent;background:#f5f6fa;color:#5b6172;font-weight:600}
-.qnum:hover{border-color:#5b8def;color:#5b8def;transform:translateY(-1px)}
-.qnum.active{border-color:#5b8def!important;color:#fff!important;background:#5b8def!important;box-shadow:0 2px 6px rgba(91,141,239,0.3)}
-.qnum.mastered{color:#3fb371;background:rgba(82,199,133,0.15)}
-.qnum.unstudied{color:#8a8fa3;background:#f0f2f7}
-.qnum.error{color:#ff5d77;background:rgba(255,122,144,0.15)}
-.qnum.filtered-out{display:none!important}
+  .options { display:flex; flex-direction:column; gap:.7rem; }
+  .opt {
+    display:flex; align-items:center; gap:.8rem; width:100%; text-align:left;
+    font-family:inherit; font-size:1.02rem; color:var(--ink); cursor:pointer;
+    background:#f7fbfc; border:2px solid rgba(0,0,0,0.08); border-radius:14px;
+    padding:.72rem 1rem; min-height:48px; transition:border-color .15s, background .15s, transform .1s;
+    position:relative; overflow:hidden;
+  }
+  .opt:hover { border-color:var(--sky); background:#eef6ff; transform:translateY(-1px); }
+  .opt .key {
+    width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:#fff; border:2px solid rgba(0,0,0,0.14); font-size:.9rem; font-weight:bold; color:var(--ink-soft);
+  }
+  .opt.correct { border-color:var(--green); background:#eafaf1; }
+  .opt.correct .key { border-color:var(--green); color:var(--green); background:#d5f5e3; }
+  .opt.wrong-chosen { border-color:var(--red); background:#fdecea; }
+  .opt.wrong-chosen .key { border-color:var(--red); color:var(--red); background:#fadbd8; }
+  .opt.dim { opacity:.55; }
+  .opt .mark { margin-left:auto; font-size:1.1rem; }
 
-/* ============ 右侧 ============ */
-.right{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.right-inner{flex:1;overflow-y:auto;padding:24px 32px}
-.right-inner::-webkit-scrollbar{width:8px}
-.right-inner::-webkit-scrollbar-thumb{background:#d8dce8;border-radius:4px}
+  /* Reveal banner */
+  .reveal-banner {
+    margin-top:1rem; border-radius:14px; padding:.8rem 1rem; font-size:1.02rem; font-weight:bold;
+    display:flex; gap:.6rem; align-items:center; animation: slideUp .35s ease both;
+  }
+  .reveal-banner.good { background:#eafaf1; color:#1e8449; }
+  .reveal-banner.bad { background:#fdecea; color:#c0392b; }
+  .reveal-banner.slow { background:#fef5e7; color:#b9770e; }
+  .reveal-exp { margin-top:.6rem; background:#f4f8fa; border-radius:12px; padding:.8rem 1rem; font-size:.95rem; color:var(--ink-soft); line-height:1.5; }
+  .reveal-exp b { color:var(--ink); }
+  .next-row { display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+  .pts-gain { font-weight:bold; font-size:1rem; }
+  .pts-gain.gain { color:var(--green); }
+  .pts-gain.none { color:var(--ink-soft); }
+  .next-btn {
+    font-family:inherit; font-size:1.02rem; font-weight:bold; cursor:pointer; color:#fff;
+    background:linear-gradient(135deg,var(--sky),#2e86de); border:none; border-radius:999px;
+    padding:.7rem 1.7rem; box-shadow:0 4px 14px rgba(79,157,232,0.4); transition:transform .15s;
+  }
+  .next-btn:hover { transform:translateY(-2px); }
 
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#a8adbd;font-size:15px;gap:12px;text-align:center}
-.empty-state .icon{font-size:54px}
-.empty-state .hint{font-size:13px;color:#b8bdcc}
+  .q-foot { display:flex; justify-content:center; margin-top:1rem; }
+  .speak-btn {
+    font-family:inherit; font-size:.9rem; color:var(--ink-soft); cursor:pointer; background:none;
+    border:1px solid rgba(0,0,0,0.1); border-radius:999px; padding:.35rem 1rem;
+  }
+  .speak-btn:hover { border-color:var(--sky); color:var(--sky); }
 
-.q-card{max-width:780px;margin:0 auto}
-.q-meta{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.q-id{font-size:18px;font-weight:800;color:#5b8def}
-.q-tag{font-size:11px;padding:3px 9px;border-radius:11px;font-weight:600;white-space:nowrap}
-.q-tag.type-choice{background:#e8f0ff;color:#5b8def}
-.q-tag.type-tf{background:#e8f6ed;color:#52c785}
-.q-tag.type-blank{background:#fff4e0;color:#e9a82c}
-.q-tag.type-short{background:#f0e8ff;color:#9168e8}
-.q-tag.level{background:#f0f2f7;color:#8a8fa3}
-.q-state-btn{font-size:11px;padding:4px 10px 4px 12px;border-radius:11px;border:1px solid #e0e3ed;background:#fff;cursor:pointer;color:#8a8fa3;transition:all .15s;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
-.q-state-btn:hover{border-color:#5b8def;color:#5b8def;box-shadow:0 2px 6px rgba(91,141,239,0.15);transform:translateY(-1px)}
-.q-state-btn.mastered{color:#3fb371;border-color:#a3dcbb;background:#f0faf3}
-.q-state-btn.error{color:#ff5d77;border-color:#ffb8c4;background:#fff5f6}
-.q-knowledge{font-size:12px;color:#8a8fa3;margin-left:auto;max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Results */
+  .results { text-align:center; }
+  .results h2 { font-size:1.7rem; margin-bottom:.3rem; }
+  .results .sub { color:var(--ink-soft); margin-bottom:1rem; }
+  .ring-wrap { width:150px; height:150px; margin:0 auto .6rem; position:relative; }
+  .ring-wrap svg { width:150px; height:150px; transform:rotate(-90deg); }
+  .ring-wrap .rbg { fill:none; stroke:rgba(0,0,0,0.08); stroke-width:12; }
+  .ring-wrap .rfg { fill:none; stroke:url(#gradA); stroke-width:12; stroke-linecap:round;
+    stroke-dasharray:283; stroke-dashoffset:283; transition:stroke-dashoffset 1s ease; }
+  .ring-wrap .rscore {
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .ring-wrap .rscore .n { font-size:2rem; font-weight:bold; }
+  .ring-wrap .rscore .pts { font-size:.8rem; color:var(--ink-soft); }
+  .stars { font-size:1.9rem; letter-spacing:.15rem; margin:.2rem 0 .9rem; }
+  .review { text-align:left; margin:1rem 0; }
+  .review-row { display:flex; gap:.7rem; padding:.6rem .4rem; border-bottom:1px solid rgba(0,0,0,0.06); font-size:.86rem; align-items:flex-start; }
+  .review-row .qi { font-weight:bold; color:var(--ink-soft); min-width:1.6rem; }
+  .review-row .qbody { flex:1; }
+  .review-row .qbody .qq { font-weight:bold; margin-bottom:.15rem; }
+  .review-row .qbody .aa { color:var(--ink-soft); }
+  .review-row .pts { font-weight:bold; flex-shrink:0; }
+  .review-row .pts.gain { color:var(--green); }
+  .review-row .pts.none { color:var(--ink-soft); }
 
-.q-text{font-size:16px;line-height:1.85;color:#2d3142;margin-bottom:20px;font-weight:500;white-space:pre-wrap}
+  /* Confetti */
+  #confetti { position:fixed; inset:0; pointer-events:none; z-index:200; overflow:hidden; }
+  .confetti {
+    position:absolute; top:-3vh; width:12px; height:12px; border-radius:2px;
+    animation: confetti-fall linear forwards;
+  }
 
-.opts{display:flex;flex-direction:column;gap:9px;margin-bottom:16px}
-.opt{display:flex;align-items:flex-start;gap:10px;padding:13px 16px;border-radius:10px;border:1.5px solid #e8eaf2;background:#fff;cursor:pointer;transition:all .15s;font-size:14px;line-height:1.6}
-.opt:hover{border-color:#5b8def;background:#f8faff}
-.opt .letter{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#f0f2f7;color:#5b6172;font-weight:700;flex-shrink:0;font-size:12px;transition:all .15s}
-.opt:hover .letter{background:#5b8def;color:#fff}
-.opt .text{flex:1;padding-top:2px;color:#2d3142}
-.opt.selected{border-color:#5b8def;background:#f0f5ff}
-.opt.selected .letter{background:#5b8def;color:#fff}
-.opt.correct{border-color:#52c785;background:#f0faf3}
-.opt.correct .letter{background:#52c785;color:#fff}
-.opt.wrong{border-color:#ff7a90;background:#fff5f6}
-.opt.wrong .letter{background:#ff7a90;color:#fff}
-.opt.disabled{pointer-events:none}
+  /* Hamburger / overlay (mobile) */
+  .hamburger { display:none; position:fixed; top:.7rem; left:.7rem; z-index:40;
+    background:#fff; border:1px solid rgba(0,0,0,0.15); border-radius:10px;
+    padding:.35rem .65rem; font-size:1.25rem; cursor:pointer; font-family:inherit; }
+  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:19; }
+  .overlay.open { display:block; }
 
-.q-input{width:100%;padding:13px 15px;border-radius:10px;border:1.5px solid #e8eaf2;font-size:15px;font-family:inherit;background:#fff;color:#2d3142;outline:none;transition:all .15s;resize:vertical;margin-bottom:14px}
-.q-input:focus{border-color:#5b8def;background:#f8faff}
-.q-input.short{min-height:48px}
-.q-input.long{min-height:120px}
-.q-input:disabled{background:#f5f6fa;color:#8a8fa3}
+  /* Keyframes */
+  @keyframes bob { 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-8px);} }
+  @keyframes pop { 0%{ transform:scale(0.4); opacity:0;} 100%{ transform:scale(1); opacity:1;} }
+  @keyframes slideUp { from{ opacity:0; transform:translateY(14px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes cardIn { from{ opacity:0; transform:translateY(20px) scale(0.97);} to{ opacity:1; transform:none;} }
+  @keyframes confetti-fall { to { transform:translateY(108vh) rotate(var(--rx,180deg)); opacity:.9; } }
+  .card-in { animation:cardIn .35s ease both; }
 
-.q-actions{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.q-actions button{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
-.btn-submit{background:#5b8def;color:#fff}
-.btn-submit:hover{background:#4a7adb}
-.btn-submit:disabled{background:#b8bdcc;cursor:not-allowed}
-.btn-reveal{background:#f0f2f7;color:#5b6172}
-.btn-reveal:hover{background:#e0e3ed}
-.btn-reset{background:#fff;color:#8a8fa3;border:1.5px solid #e0e3ed!important}
-.btn-reset:hover{border-color:#ff7a90!important;color:#ff7a90}
-
-.auto-state-hint{font-size:13px;padding:9px 14px;border-radius:8px;margin-bottom:14px;display:none;font-weight:600}
-.auto-state-hint.mastered{display:block;background:rgba(82,199,133,0.12);color:#3fb371;border:1px solid rgba(82,199,133,0.3)}
-.auto-state-hint.error{display:block;background:rgba(255,122,144,0.12);color:#ff5d77;border:1px solid rgba(255,122,144,0.3)}
-.auto-state-hint.retry{display:block;background:rgba(255,200,87,0.18);color:#d68b00;border:1px solid rgba(255,200,87,0.4);animation:slideIn .25s}
-@keyframes slideIn{from{transform:translateY(-4px);opacity:0}to{transform:translateY(0);opacity:1}}
-.opt.wrong-shake{animation:shake .5s;border-color:#ff7a90;background:#fff5f6}
-@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
-
-.analysis{display:none;margin-top:14px;padding:14px 18px;background:#fafbfd;border-radius:10px;border-left:4px solid #5b8def}
-.analysis.visible{display:block}
-.analysis.correct{border-left-color:#52c785;background:#f0faf3}
-.analysis.wrong{border-left-color:#ff7a90;background:#fff5f6}
-.ans-line{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.analysis .ans-line{color:#3fb371}
-.analysis.wrong .ans-line{color:#ff5d77}
-.ans-text{font-size:13px;color:#5b6172;line-height:1.75;margin-bottom:6px}
-.ans-text strong{color:#2d3142}
-.ans-text em{color:#5b8def;font-style:normal;font-weight:600}
-.ans-text code{background:rgba(91,141,239,0.1);padding:1px 6px;border-radius:4px;font-size:12px;color:#5b8def}
-.tip{font-size:13px;color:#d68b00;line-height:1.7;padding:8px 12px;background:rgba(255,200,87,0.15);border-radius:6px;margin-top:8px;display:none}
-.tip.visible{display:block}
-.kw{font-size:12px;color:#a8adbd;margin-top:8px}
-
-/* ============ 导航条 ============ */
-.nav-bar{padding:12px 32px;border-top:1px solid #e8eaf2;display:flex;align-items:center;justify-content:space-between;background:#fafbfd;flex-shrink:0}
-.nav-btn{padding:7px 18px;border-radius:7px;border:1px solid #e0e3ed;background:#fff;color:#5b6172;cursor:pointer;font-size:13px;transition:all .15s}
-.nav-btn:hover:not(:disabled){border-color:#5b8def;color:#5b8def}
-.nav-btn:disabled{opacity:.4;cursor:default}
-.nav-info{font-size:12px;color:#8a8fa3}
-.kbd-hint{font-size:11px;color:#a8adbd;flex:1;text-align:center}
-@media(max-width:900px){.kbd-hint{display:none}}
-
-/* ============ Modal ============ */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
-.modal-overlay.visible{display:flex}
-.modal{background:#fff;border-radius:14px;padding:24px 28px;max-width:480px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.15)}
-.modal h3{font-size:17px;color:#2d3142;margin-bottom:10px}
-.modal p{font-size:13px;color:#8a8fa3;line-height:1.6;margin-bottom:16px}
-.modal-row{margin-bottom:14px}
-.modal-row label{display:block;font-size:12px;color:#5b6172;margin-bottom:6px;font-weight:600}
-.modal-row .opts-row{display:flex;flex-wrap:wrap;gap:6px}
-.modal-btn{padding:7px 14px;border-radius:7px;border:1px solid #e0e3ed;background:#fff;color:#5b6172;cursor:pointer;font-size:13px;transition:all .15s}
-.modal-btn:hover{border-color:#5b8def;color:#5b8def}
-.modal-btn.selected{border-color:#5b8def;background:#5b8def;color:#fff}
-.modal-textarea{width:100%;min-height:140px;padding:10px;border-radius:8px;border:1.5px solid #e8eaf2;font-family:monospace;font-size:12px;resize:vertical;outline:none}
-.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-.modal-actions .primary{background:#5b8def;color:#fff;border:none;padding:8px 18px;border-radius:7px;cursor:pointer;font-weight:600}
-.modal-actions .primary:hover{background:#4a7adb}
-.modal-actions .danger{border-color:#ff7a90;color:#ff5d77}
-
-/* ============ 模拟考模式 ============ */
-.exam-overlay{display:none;position:fixed;inset:0;background:#f5f7fb;z-index:2000;flex-direction:column;overflow:hidden}
-.exam-overlay.visible{display:flex}
-.exam-topbar{background:#fff;border-bottom:1px solid #e8eaf2;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-.exam-topbar h2{font-size:15px;color:#5b8def;font-weight:700}
-.exam-progress{flex:1;display:flex;align-items:center;gap:8px;min-width:120px}
-.exam-progress-bar{flex:1;height:6px;background:#e8eaf2;border-radius:3px;overflow:hidden}
-.exam-progress-fill{height:100%;background:linear-gradient(90deg,#5b8def,#7a9fff);border-radius:3px;transition:width .3s}
-.exam-progress-text{font-size:12px;color:#8a8fa3;white-space:nowrap}
-.exam-timer{font-size:13px;color:#e9a82c;font-weight:700}
-.exam-body{flex:1;overflow-y:auto;padding:20px 28px}
-.exam-q-card{max-width:780px;margin:0 auto 16px;background:#fff;border:1px solid #e8eaf2;border-radius:12px;padding:18px 22px;box-shadow:0 2px 6px rgba(0,0,0,0.03)}
-.exam-q-num{font-size:13px;color:#5b8def;font-weight:700;margin-bottom:8px}
-.exam-q-text{font-size:15px;line-height:1.75;color:#2d3142;margin-bottom:12px;white-space:pre-wrap}
-.exam-opts{display:flex;flex-direction:column;gap:6px}
-.exam-opt{padding:9px 14px;border-radius:8px;border:1.5px solid #e8eaf2;background:#fff;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.55}
-.exam-opt:hover{border-color:#5b8def;background:#f8faff}
-.exam-opt.selected{border-color:#5b8def;background:#f0f5ff}
-.exam-opt .letter{font-weight:700;min-width:22px;color:#5b6172;flex-shrink:0}
-.exam-opt.selected .letter{color:#5b8def}
-.exam-input{width:100%;padding:9px 12px;border-radius:7px;border:1.5px solid #e8eaf2;font-size:13px;outline:none;font-family:inherit;resize:vertical;min-height:42px}
-.exam-input:focus{border-color:#5b8def}
-.exam-submit-bar{padding:14px 28px;border-top:1px solid #e8eaf2;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;flex-shrink:0}
-.exam-submit-btn{padding:9px 28px;border-radius:8px;border:none;background:#5b8def;color:#fff;cursor:pointer;font-size:14px;font-weight:700}
-.exam-submit-btn:hover{background:#4a7adb}
-.exam-quit-btn{padding:9px 18px;border-radius:8px;border:1px solid #e0e3ed;background:#fff;color:#8a8fa3;cursor:pointer;font-size:13px}
-.exam-quit-btn:hover{border-color:#ff7a90;color:#ff5d77}
-
-/* 结果页 */
-.exam-results{display:none;position:fixed;inset:0;background:#f5f7fb;z-index:2000;flex-direction:column;overflow:hidden}
-.exam-results.visible{display:flex}
-.results-header{background:#fff;border-bottom:1px solid #e8eaf2;padding:24px;text-align:center;flex-shrink:0}
-.results-score{font-size:54px;font-weight:900;margin-bottom:4px;line-height:1}
-.results-score.pass{color:#52c785}
-.results-score.fail{color:#ff5d77}
-.results-detail{font-size:14px;color:#8a8fa3;margin-bottom:14px}
-.results-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.results-actions button{padding:8px 18px;border-radius:7px;border:1px solid #e0e3ed;background:#fff;color:#5b6172;cursor:pointer;font-size:13px}
-.results-actions button:hover{border-color:#5b8def;color:#5b8def}
-.results-actions button.primary{background:#5b8def;color:#fff;border-color:#5b8def}
-.results-body{flex:1;overflow-y:auto;padding:18px 24px}
-.result-item{max-width:780px;margin:0 auto 12px;background:#fff;border:1px solid #e8eaf2;border-radius:10px;padding:14px 18px}
-.result-item.is-correct{border-left:4px solid #52c785}
-.result-item.is-wrong{border-left:4px solid #ff7a90}
-.result-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
-.result-badge{font-size:11px;padding:2px 9px;border-radius:10px;font-weight:700}
-.result-badge.correct{background:#f0faf3;color:#3fb371}
-.result-badge.wrong{background:#fff5f6;color:#ff5d77}
-.result-qid{font-size:12px;color:#5b8def;font-weight:700}
-.result-text{font-size:13px;line-height:1.7;color:#2d3142;margin-bottom:6px;white-space:pre-wrap}
-.result-answers{font-size:12px;color:#5b6172;margin-bottom:6px}
-.result-answers .correct-ans{color:#3fb371;font-weight:700}
-.result-answers .wrong-ans{color:#ff5d77;text-decoration:line-through}
-.result-analysis{font-size:12px;color:#5b6172;line-height:1.7;padding:7px 11px;background:#fafbfd;border-radius:6px;margin-bottom:6px}
-.result-tip{font-size:12px;color:#d68b00;line-height:1.6;padding:6px 10px;background:rgba(255,200,87,0.15);border-radius:6px;margin-bottom:6px}
-
-/* ============ 移动端 ============ */
-.sidebar-toggle{display:none;position:fixed;bottom:20px;right:20px;z-index:999;width:48px;height:48px;border-radius:50%;background:#5b8def;color:#fff;border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
-.sidebar-toggle:active{transform:scale(0.92)}
-@media(max-width:768px){
-  .left{width:100%;min-width:100%;max-height:50vh;border-right:none;border-bottom:1px solid #e8eaf2;transition:max-height .3s ease}
-  .left.hidden{max-height:0;overflow:hidden;border-bottom:none}
-  .main{flex-direction:column}
-  .topbar{gap:8px;padding:8px 12px}
-  .topbar h1{font-size:14px}
-  .cat-filter{order:10;width:100%}
-  .io-btns{margin-left:0;width:100%;justify-content:flex-end}
-  .right-inner{padding:14px}
-  .sidebar-toggle{display:flex;align-items:center;justify-content:center}
-  .nav-bar{padding:10px 14px}
-}
-
-/* ============ Dark Mode ============ */
-body.dark{background:#1a1a2e;color:#e0e3ed}
-body.dark .topbar{background:#16213e;border-bottom-color:#0f3460;box-shadow:none}
-body.dark .topbar h1{color:#e88ca5}
-body.dark .cat-filter-label,body.dark .cat-sub-name,body.dark .left-header,body.dark .nav-info,body.dark .empty-state,body.dark .ans-text,body.dark .modal p{color:#888}
-body.dark .cat-chip{background:transparent;border-color:#333;color:#888}
-body.dark .cat-chip.active{background:#e88ca5;color:#fff;border-color:#e88ca5}
-body.dark .sf-btn{background:transparent;border-color:#333;color:#aaa}
-body.dark .sf-btn:hover{border-color:#e88ca5}
-body.dark .sf-btn .num{color:#e0e3ed}
-body.dark .io-btns button{background:transparent;border-color:#333;color:#aaa}
-body.dark .io-btns button:hover{border-color:#e88ca5;color:#e88ca5}
-body.dark .io-btns button.exam{background:rgba(232,140,165,0.15);border-color:#e88ca5;color:#e88ca5}
-body.dark .left{background:#16213e;border-right-color:#0f3460}
-body.dark .left-scroll::-webkit-scrollbar-thumb{background:#333}
-body.dark .cat-top{background:#16213e;color:#e0e3ed;border-bottom-color:#0f3460}
-body.dark .cat-law{color:#c5cad8;border-top-color:#1f2a44}
-body.dark .cat-law-count{background:#1f2a44;color:#888}
-body.dark .cat-count{color:#666}
-body.dark .qnum{background:rgba(100,100,100,0.15);color:#777;border-color:transparent}
-body.dark .qnum:hover{border-color:#e88ca5;color:#fff}
-body.dark .qnum.active{background:#e88ca5!important;border-color:#e88ca5!important;color:#fff!important}
-body.dark .qnum.mastered{background:rgba(110,197,168,0.15);color:#6ec5a8}
-body.dark .qnum.unstudied{background:rgba(100,100,100,0.15);color:#888}
-body.dark .qnum.error{background:rgba(232,140,165,0.15);color:#e88ca5}
-body.dark .right-inner::-webkit-scrollbar-thumb{background:#333}
-body.dark .q-text{color:#e0e3ed}
-body.dark .q-id{color:#e88ca5}
-body.dark .q-tag.type-choice{background:rgba(91,141,239,0.15);color:#7a9fff}
-body.dark .q-tag.type-tf{background:rgba(110,197,168,0.15);color:#6ec5a8}
-body.dark .q-tag.type-blank{background:rgba(255,200,87,0.15);color:#f4a261}
-body.dark .q-tag.type-short{background:rgba(145,104,232,0.15);color:#b08fff}
-body.dark .q-tag.level{background:rgba(100,100,100,0.2);color:#888}
-body.dark .q-state-btn{background:transparent;border-color:#333;color:#aaa}
-body.dark .q-knowledge{color:#666}
-body.dark .opt{background:#1f2541;border-color:#333;color:#e0e3ed}
-body.dark .opt:hover{background:rgba(232,140,165,0.05);border-color:#555}
-body.dark .opt .text{color:#e0e3ed}
-body.dark .opt .letter{background:#333;color:#888}
-body.dark .opt.selected{background:rgba(232,140,165,0.1);border-color:#e88ca5}
-body.dark .opt.correct{background:rgba(110,197,168,0.1);border-color:#6ec5a8}
-body.dark .opt.wrong{background:rgba(232,140,165,0.1);border-color:#e88ca5}
-body.dark .q-input{background:#1f2541;border-color:#333;color:#e0e3ed}
-body.dark .q-input:focus{background:#1a1a2e;border-color:#e88ca5}
-body.dark .btn-submit{background:#e88ca5}
-body.dark .btn-submit:hover{background:#d97a93}
-body.dark .btn-reveal{background:#333;color:#aaa}
-body.dark .btn-reset{background:transparent;color:#888}
-body.dark .analysis{background:#1a1a2e;border-left-color:#e88ca5}
-body.dark .analysis.correct{background:#1a1a2e;border-left-color:#6ec5a8}
-body.dark .analysis.wrong{background:#1a1a2e;border-left-color:#e88ca5}
-body.dark .nav-bar{background:#16213e;border-top-color:#0f3460}
-body.dark .nav-btn{background:transparent;border-color:#333;color:#aaa}
-body.dark .kbd-hint{color:#555}
-body.dark .modal{background:#16213e;color:#e0e3ed}
-body.dark .modal h3{color:#e0e3ed}
-body.dark .modal-btn{background:transparent;border-color:#333;color:#aaa}
-body.dark .modal-btn.selected{background:#e88ca5;border-color:#e88ca5;color:#fff}
-body.dark .modal-textarea{background:#1f2541;border-color:#333;color:#e0e3ed}
-body.dark .exam-overlay,body.dark .exam-results{background:#1a1a2e}
-body.dark .exam-topbar,body.dark .exam-submit-bar,body.dark .results-header{background:#16213e;border-color:#0f3460}
-body.dark .exam-q-card,body.dark .result-item{background:#16213e;border-color:#0f3460}
-body.dark .exam-q-text,body.dark .result-text{color:#e0e3ed}
-body.dark .exam-opt{background:#1f2541;border-color:#333;color:#e0e3ed}
-body.dark .exam-opt.selected{background:rgba(232,140,165,0.1);border-color:#e88ca5}
-body.dark .result-analysis{background:#1a1a2e;color:#aaa}
-body.dark .auto-state-hint.mastered{background:rgba(110,197,168,0.1);color:#6ec5a8;border-color:rgba(110,197,168,0.3)}
-body.dark .auto-state-hint.error{background:rgba(232,140,165,0.1);color:#e88ca5;border-color:rgba(232,140,165,0.3)}
+  @media (max-width:768px) {
+    .sidebar { position:fixed; left:0; top:0; bottom:0; transform:translateX(-100%); z-index:100; box-shadow:0 0 40px rgba(0,0,0,0.2); }
+    .sidebar.open { transform:translateX(0); }
+    .hamburger { display:block; }
+    .card { padding:1.4rem 1.2rem 1.6rem; }
+    .q-text { font-size:1.15rem; }
+  }
 </style>
 </head>
-<body class="light">
+<body>
 
-<div class="topbar">
-  <div class="topbar-row1">
-    <h1>📚 📚 Chemistry · Atomic Structure <span class="subtitle">共 40 题 · 选择×36 · 判断×4 · Chemistry</span></h1>
-    <div class="stat-filters" id="statFilters">
-      <div class="sf-btn" data-f="mastered" onclick="toggleFilter('mastered',this)"><span class="dot green"></span><span class="num" id="numMastered">0</span><span>已掌握</span></div>
-      <div class="sf-btn" data-f="unstudied" onclick="toggleFilter('unstudied',this)"><span class="dot gray"></span><span class="num" id="numUnstudied">0</span><span>未做</span></div>
-      <div class="sf-btn" data-f="error" onclick="toggleFilter('error',this)"><span class="dot red"></span><span class="num" id="numError">0</span><span>错题</span></div>
-    </div>
-    <div class="io-btns">
-      <button class="exam" onclick="showExamModal()">📝 模拟考</button>
-      <button onclick="randomQ()">🎲 随机</button>
-      <button onclick="exportProgress()">💾 导出进度</button>
-      <button class="danger" onclick="showResetModal()">🗑️ 重置</button>
-      <button class="theme-toggle" onclick="toggleTheme()" title="切换主题">☀️</button>
-    </div>
-  </div>
-  <div class="topbar-row2">
-    <div class="cat-filter" id="catFilter"><span class="cat-filter-label">📂 分类：</span></div>
-  </div>
-</div>
+<div id="confetti"></div>
 
-<button class="sidebar-toggle" onclick="toggleSidebar()">📋</button>
+<button class="hamburger" id="hamburger">☰</button>
+<div class="overlay" id="overlay"></div>
 
-<div class="main">
-  <div class="left" id="sidebar">
-    <div class="left-header"><span>📚 题号目录</span><span class="progress" id="progressTxt">0/0</span></div>
-    <div class="left-scroll" id="leftScroll"></div>
-  </div>
-  <div class="right">
-    <div class="right-inner" id="rightInner">
-      <div class="empty-state">
-        <div class="icon">📖</div>
-        <div>选择左侧题号开始学习</div>
-        <div class="hint">点击题号查看，做完会自动记录到本地</div>
-      </div>
-    </div>
-    <div class="nav-bar" id="navBar" style="display:none;">
-      <button class="nav-btn" id="prevBtn" onclick="goPrev()" title="← 上一题">← 上一题</button>
-      <span class="nav-info" id="navInfo"></span>
-      <span class="kbd-hint">⌨️ A/B/C/D 选项 · Enter 提交 · ← → 切题 · Space 看答案</span>
-      <button class="nav-btn" id="nextBtn" onclick="goNext()" title="→ 下一题">下一题 →</button>
-    </div>
-  </div>
-</div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header" id="sidebar-home"><span class="ticker">🧠</span> <span id="side-title">Atomic Structure</span></div>
+  <div class="tree" id="tree"></div>
+</aside>
 
-<!-- ===== 模拟考 modal ===== -->
-<div class="modal-overlay" id="examModal">
-  <div class="modal">
-    <h3>📝 开始模拟考</h3>
-    <p id="examPoolSize">从当前题池中随机抽题作答</p>
-    <div class="modal-row">
-      <label>题量</label>
-      <div class="opts-row">
-        <button class="modal-btn" data-n="5" onclick="selectExamCount(5)">5题</button>
-        <button class="modal-btn selected" data-n="10" onclick="selectExamCount(10)">10题</button>
-        <button class="modal-btn" data-n="20" onclick="selectExamCount(20)">20题</button>
-        <button class="modal-btn" data-n="30" onclick="selectExamCount(30)">30题</button>
-        <button class="modal-btn" data-n="50" onclick="selectExamCount(50)">50题</button>
-      </div>
-    </div>
-    <div class="modal-row">
-      <label>每题限时</label>
-      <div class="opts-row">
-        <button class="modal-btn selected" data-t="0" onclick="selectExamTime(0)">不限时</button>
-        <button class="modal-btn" data-t="30" onclick="selectExamTime(30)">30秒</button>
-        <button class="modal-btn" data-t="60" onclick="selectExamTime(60)">1分钟</button>
-        <button class="modal-btn" data-t="90" onclick="selectExamTime(90)">1.5分钟</button>
-        <button class="modal-btn" data-t="120" onclick="selectExamTime(120)">2分钟</button>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn" onclick="hideExamModal()">取消</button>
-      <button class="primary" onclick="startExam()">🚀 开考</button>
-    </div>
+<main class="main">
+  <div class="topbar">
+    <span class="app-title"><span>🧠</span><span id="top-title" title="Atomic Structure">Atomic Structure</span></span>
+    <span class="spacer"></span>
+    <div class="progress-track" title="Progress"><div class="progress-fill" id="progress-fill"></div></div>
+    <span class="score-chip" id="score-chip">⭐ Score: 0</span>
+    <button class="mute-btn" id="mute-btn" title="Toggle read-aloud (TTS)">🔊</button>
   </div>
-</div>
+  <div class="stage" id="stage"></div>
+</main>
 
-<!-- ===== 导入 modal ===== -->
-<div class="modal-overlay" id="importModal">
-  <div class="modal">
-    <h3 id="importTitle">📥 导入</h3>
-    <p id="importHint">粘贴 JSON 内容</p>
-    <textarea class="modal-textarea" id="importText" placeholder=""></textarea>
-    <div class="modal-actions">
-      <button class="modal-btn" onclick="hideImportModal()">取消</button>
-      <button class="primary" onclick="doImport()">导入</button>
-    </div>
-  </div>
-</div>
+<script type="application/json" id="quiz-data">{"title": "Atomic Structure", "sections": [{"id": "atomic", "title": "Atomic Structure", "emoji": "⚛️", "questions": [{"id": "atomic-structure-ocr-q1", "section": "Basics", "question": "What is an atom?", "options": ["The basic unit of matter", "A mixture of substances", "A type of energy", "A kind of cell"], "correctIndex": 0, "explanation": "An atom is the basic unit of matter.", "suggestImage": true, "imageNote": "Diagram of an atom with nucleus and electrons"}, {"id": "atomic-structure-ocr-q2", "section": "Basics", "question": "Which is the smallest particle of an element?", "options": ["Atom", "Molecule", "Radical", "Cell"], "correctIndex": 0, "explanation": "An atom is the smallest particle of an element.", "suggestImage": false}, {"id": "atomic-structure-ocr-q3", "section": "Basics", "question": "A molecule is formed when atoms of the same or different elements", "options": ["Combine", "Split apart", "Disappear", "Melt"], "correctIndex": 0, "explanation": "Atoms combine to form a molecule.", "suggestImage": false}, {"id": "atomic-structure-ocr-q4", "section": "Basics", "question": "What is a radical?", "options": ["A single atom or group of atoms acting as one unit with a charge", "A pure element", " A type of energy", "A kind of cell"], "correctIndex": 0, "explanation": "A radical acts as a single unit with a charge.", "suggestImage": false}, {"id": "atomic-structure-ocr-q5", "section": "Subatomic", "question": "Which particle has a positive charge?", "options": ["Proton", "Electron", "Neutron", "Atom"], "correctIndex": 0, "explanation": "Protons carry a positive charge.", "suggestImage": true, "imageNote": "Atom showing protons in nucleus"}, {"id": "atomic-structure-ocr-q6", "section": "Subatomic", "question": "Which particle has no charge?", "options": ["Neutron", "Proton", "Electron", "Radical"], "correctIndex": 0, "explanation": "Neutrons have no charge.", "suggestImage": false}, {"id": "atomic-structure-ocr-q7", "section": "Subatomic", "question": "Electrons carry what kind of charge?", "options": ["Negative", "Positive", "No charge", "Double charge"], "correctIndex": 0, "explanation": "Electrons carry a negative charge.", "suggestImage": false}, {"id": "atomic-structure-ocr-q8", "section": "Subatomic", "question": "Where are protons and neutrons found?", "options": ["In the nucleus", "In the shells", "Outside the atom", "In the air"], "correctIndex": 0, "explanation": "Protons and neutrons are in the central nucleus.", "suggestImage": true, "imageNote": "Atom with nucleus and electron shells"}, {"id": "atomic-structure-ocr-q9", "section": "Subatomic", "question": "What revolves around the nucleus?", "options": ["Electrons", "Protons", "Neutrons", "Radicals"], "correctIndex": 0, "explanation": "Electrons revolve around the nucleus in shells.", "suggestImage": false}, {"id": "atomic-structure-ocr-q10", "section": "Atomic Number", "question": "Atomic number equals the number of", "options": ["Protons (and electrons)", "Neutrons", "Shells", "Molecules"], "correctIndex": 0, "explanation": "Atomic number equals protons and electrons.", "suggestImage": false}, {"id": "atomic-structure-ocr-q11", "section": "Atomic Number", "question": "Mass number equals protons plus", "options": ["Neutrons", "Electrons", "Shells", "Radicals"], "correctIndex": 0, "explanation": "Mass number is protons plus neutrons.", "suggestImage": false}, {"id": "atomic-structure-ocr-q12", "section": "Atomic Number", "question": "A carbon atom has 6 protons, 6 electrons and 6", "options": ["Neutrons", "Shells", "Radicals", "Molecules"], "correctIndex": 0, "explanation": "Carbon has 6 protons, 6 electrons and 6 neutrons.", "suggestImage": false}, {"id": "atomic-structure-ocr-q13", "section": "Atomic Number", "question": "The atomic number of carbon is", "options": ["6", "12", "14", "16"], "correctIndex": 0, "explanation": "Carbon's atomic number is 6.", "suggestImage": false}, {"id": "atomic-structure-ocr-q14", "section": "Atomic Number", "question": "The mass number of carbon is", "options": ["12", "6", "14", "16"], "correctIndex": 0, "explanation": "Carbon's mass number is 12.", "suggestImage": false}, {"id": "atomic-structure-ocr-q15", "section": "History", "question": "Who discovered the electron?", "options": ["J.J. Thomson", "Rutherford", "Chadwick", "Goldstein"], "correctIndex": 0, "explanation": "J.J. Thomson discovered electrons in 1897.", "suggestImage": false}, {"id": "atomic-structure-ocr-q16", "section": "History", "question": "Who discovered the atomic nucleus?", "options": ["Rutherford", "Thomson", "Chadwick", "Goldstein"], "correctIndex": 0, "explanation": "Rutherford discovered the atomic nucleus.", "suggestImage": false}, {"id": "atomic-structure-ocr-q17", "section": "History", "question": "Who discovered the neutron?", "options": ["James Chadwick", "Rutherford", "Thomson", "Goldstein"], "correctIndex": 0, "explanation": "Chadwick discovered neutrons in 1932.", "suggestImage": false}, {"id": "atomic-structure-ocr-q18", "section": "History", "question": "Dalton's atomic theory was proposed in", "options": ["1803", "1897", "1911", "1932"], "correctIndex": 0, "explanation": "Dalton proposed atomic theory in 1803.", "suggestImage": false}, {"id": "atomic-structure-ocr-q19", "section": "History", "question": "Modern atomic theory says atoms are", "options": ["Divisible and made of subatomic particles", "Indestructible and indivisible", "Only made of protons", " Only made of electrons"], "correctIndex": 0, "explanation": "Modern theory says atoms are divisible into particles.", "suggestImage": false}, {"id": "atomic-structure-ocr-q20", "section": "Molecules", "question": "A molecule of an element is formed from", "options": ["The same kind of atoms", "Different kinds of atoms", "Only one atom", " Only radicals"], "correctIndex": 0, "explanation": "An element's molecule has the same kind of atoms.", "suggestImage": false}, {"id": "atomic-structure-ocr-q21", "section": "Molecules", "question": "A molecule of a compound is formed from", "options": ["Different kinds of atoms", "The same kind of atoms", "Only one atom", " Only radicals"], "correctIndex": 0, "explanation": "A compound's molecule has different kinds of atoms.", "suggestImage": false}, {"id": "atomic-structure-ocr-q22", "section": "Molecules", "question": "Atomicity is the number of atoms in a", "options": ["Molecule of an element", "Radical", "Compound", "Cell"], "correctIndex": 0, "explanation": "Atomicity is atoms in a molecule of an element.", "suggestImage": false}, {"id": "atomic-structure-ocr-q23", "section": "Molecules", "question": "Which is a diatomic molecule?", "options": ["Oxygen (O2)", "Helium (He)", "Ozone (O3)", "Phosphorus (P4)"], "correctIndex": 0, "explanation": "Oxygen is a diatomic molecule (O2).", "suggestImage": false}, {"id": "atomic-structure-ocr-q24", "section": "Molecules", "question": "Which is a monoatomic molecule?", "options": ["Helium (He)", "Oxygen (O2)", "Ozone (O3)", "Sulphur (S8)"], "correctIndex": 0, "explanation": "Helium is a monoatomic noble gas.", "suggestImage": false}, {"id": "atomic-structure-ocr-q25", "section": "Molecules", "question": "Ozone (O3) is a", "options": ["Triatomic molecule", "Diatomic molecule", "Monoatomic molecule", "Polyatomic molecule"], "correctIndex": 0, "explanation": "Ozone has three atoms, so it is triatomic.", "suggestImage": false}, {"id": "atomic-structure-ocr-q26", "section": "Radicals", "question": "A radical takes part in a reaction", "options": ["Unsplit", "Split into atoms", "As energy", "As a cell"], "correctIndex": 0, "explanation": "A radical takes part unsplit in reactions.", "suggestImage": false}, {"id": "atomic-structure-ocr-q27", "section": "Radicals", "question": "A positively charged radical is called a", "options": ["Cation", "Anion", "Atom", "Molecule"], "correctIndex": 0, "explanation": "Positively charged ions are cations.", "suggestImage": false}, {"id": "atomic-structure-ocr-q28", "section": "Radicals", "question": "A negatively charged radical is called an", "options": ["Anion", "Cation", "Atom", "Molecule"], "correctIndex": 0, "explanation": "Negatively charged ions are anions.", "suggestImage": false}, {"id": "atomic-structure-ocr-q29", "section": "Valency", "question": "Valency is the combining capacity of an element with", "options": ["Hydrogen", "Oxygen only", "Carbon only", "Nitrogen only"], "correctIndex": 0, "explanation": "Valency is combining capacity with hydrogen.", "suggestImage": false}, {"id": "atomic-structure-ocr-q30", "section": "Valency", "question": "Valency of oxygen is", "options": ["2", "1", "3", "4"], "correctIndex": 0, "explanation": "Oxygen has a valency of 2.", "suggestImage": false}, {"id": "atomic-structure-ocr-q31", "section": "Valency", "question": "Valency of chlorine is", "options": ["1", "2", "3", "4"], "correctIndex": 0, "explanation": "Chlorine has a valency of 1.", "suggestImage": false}, {"id": "atomic-structure-ocr-q32", "section": "Valency", "question": "Valency of metals (and hydrogen) is", "options": ["Positive", "Negative", "Zero", "Variable only"], "correctIndex": 0, "explanation": "Metal valency is positive.", "suggestImage": false}, {"id": "atomic-structure-ocr-q33", "section": "Valency", "question": "Which element shows variable valency?", "options": ["Copper", "Helium", "Neon", "Argon"], "correctIndex": 0, "explanation": "Copper shows variable valency (Cu+, Cu2+).", "suggestImage": false}, {"id": "atomic-structure-ocr-q34", "section": "Formula", "question": "A chemical formula uses", "options": ["Symbols of elements", "Full words", "Numbers only", "Pictures"], "correctIndex": 0, "explanation": "A formula uses element symbols.", "suggestImage": false}, {"id": "atomic-structure-ocr-q35", "section": "Formula", "question": "The formula for water is", "options": ["H2O", "CO2", "NaCl", "HCl"], "correctIndex": 0, "explanation": "Water's formula is H2O.", "suggestImage": false}, {"id": "atomic-structure-ocr-q36", "section": "Equations", "question": "A balanced equation obeys", "options": ["Conservation of matter", "Creation of matter", "Destruction of matter", " Random change"], "correctIndex": 0, "explanation": "Balanced equations conserve matter.", "suggestImage": false}, {"id": "atomic-structure-ocr-q37", "section": "Periodic Table", "question": "The periodic table has how many groups (columns)?", "options": ["18", "7", "20", "10"], "correctIndex": 0, "explanation": "There are 18 groups in the periodic table.", "suggestImage": true, "imageNote": "Periodic table showing groups and periods"}, {"id": "atomic-structure-ocr-q38", "section": "Periodic Table", "question": "The periodic table has how many periods (rows)?", "options": ["7", "18", "20", "10"], "correctIndex": 0, "explanation": "There are 7 periods in the periodic table.", "suggestImage": false}, {"id": "atomic-structure-ocr-q39", "section": "Periodic Table", "question": "Group number tells the number of electrons in the", "options": ["Outer shell", "Nucleus", "Inner shell", "All shells"], "correctIndex": 0, "explanation": "Group number equals outer-shell electrons.", "suggestImage": false}, {"id": "atomic-structure-ocr-q40", "section": "Periodic Table", "question": "Elements in the same group have", "options": ["Same valency and similar properties", "Different valency", "No properties", "Only metals"], "correctIndex": 0, "explanation": "Same group means same valency and properties.", "suggestImage": false}]}]}</script>
 
-<!-- ===== 重置 modal ===== -->
-<div class="modal-overlay" id="resetModal">
-  <div class="modal">
-    <h3>🗑️ 重置答题记录</h3>
-    <p>这会清空所有"已掌握 / 错题 / 答题状态"，但题目本身不会删除。确定吗？</p>
-    <div class="modal-actions">
-      <button class="modal-btn" onclick="hideResetModal()">取消</button>
-      <button class="primary danger" style="background:#ff5d77;" onclick="doReset()">确认重置</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== 模拟考答题界面 ===== -->
-<div class="exam-overlay" id="examOverlay">
-  <div class="exam-topbar">
-    <h2>📝 模拟考</h2>
-    <div class="exam-progress">
-      <div class="exam-progress-bar"><div class="exam-progress-fill" id="examProgressFill" style="width:0%"></div></div>
-      <span class="exam-progress-text" id="examProgressText">0 / 0</span>
-    </div>
-    <span class="exam-timer" id="examTimer">⏱ 0:00</span>
-    <button class="exam-quit-btn" onclick="quitExam()">退出</button>
-  </div>
-  <div class="exam-body" id="examBody"></div>
-  <div class="exam-submit-bar">
-    <button class="exam-submit-btn" id="examSubmitBtn" onclick="submitExam()">📤 提交答卷</button>
-  </div>
-</div>
-
-<!-- ===== 成绩页 ===== -->
-<div class="exam-results" id="examResults">
-  <div class="results-header">
-    <div class="results-score" id="resultsScore">0</div>
-    <div class="results-detail" id="resultsDetail"></div>
-    <div class="results-actions">
-      <button class="primary" onclick="closeResults()">返回</button>
-      <button onclick="retakeExam()">🔄 再考一次</button>
-    </div>
-  </div>
-  <div class="results-body" id="resultsBody"></div>
-</div>
-
-<!-- ===== 题库数据（脚本注入） ===== -->
-<script>
-window.__QUIZ_DATA__ = [{"type": "single_choice", "prompt": "An atom is the smallest particle of an element that is:", "options": ["A. made of molecules", "B. capable of independent existence", "C. not capable of independent existence", "D. a charged particle"], "answer": "C", "explanation": "An atom is the smallest particle of an element and is not capable of independent existence.", "knowledge_point": "Atom", "category": "Chemistry / Atomic Structure", "level": 1, "memory_tip": "🧠 Atom = building block, needs company to exist"}, {"type": "single_choice", "prompt": "A molecule is:", "options": ["A. a group of atoms with a charge", "B. a single atom", "C. the smallest particle of an element", "D. the smallest particle of a substance capable of independent existence"], "answer": "D", "explanation": "A molecule is the smallest particle of a substance (element or compound) capable of independent existence and retaining its properties.", "knowledge_point": "Molecule", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "A radical is:", "options": ["A. a molecule of an element", "B. a single atom or molecule", "C. a particle found in the nucleus", "D. a single atom or group of atoms behaving as a single unit with a charge"], "answer": "D", "explanation": "A radical is a single atom of an element or a group of atoms of different elements behaving as a single unit with a charge on the group.", "knowledge_point": "Radical", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "true_false", "prompt": "A molecule retains the physical and chemical properties of the substance.", "answer": "True", "explanation": "A molecule retains the characteristics of the substance of which it is the smallest particle.", "knowledge_point": "Molecule", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Atomicity of a hydrogen molecule is:", "options": ["A. triatomic", "B. diatomic", "C. polyatomic", "D. monoatomic"], "answer": "B", "explanation": "A hydrogen molecule (H2) is composed of two atoms, hence diatomic.", "knowledge_point": "Atomicity", "category": "Chemistry / Atomic Structure", "level": 1, "memory_tip": "🧠 H2 = two H atoms stuck together"}, {"type": "single_choice", "prompt": "Ozone (O3) is:", "options": ["A. monoatomic", "B. diatomic", "C. triatomic", "D. polyatomic"], "answer": "C", "explanation": "Ozone has three oxygen atoms, so it is triatomic.", "knowledge_point": "Atomicity", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Helium (He) is:", "options": ["A. triatomic", "B. diatomic", "C. monoatomic", "D. polyatomic"], "answer": "C", "explanation": "Noble gases like helium exist as single atoms, hence monoatomic.", "knowledge_point": "Atomicity", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Phosphorus (P4) is:", "options": ["A. polyatomic (tetratomic)", "B. monoatomic", "C. triatomic", "D. diatomic"], "answer": "A", "explanation": "Phosphorus exists as P4, a molecule of four atoms, hence polyatomic (tetratomic).", "knowledge_point": "Atomicity", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "Sulphur (S8) is:", "options": ["A. diatomic", "B. monoatomic", "C. triatomic", "D. polyatomic (octatomic)"], "answer": "D", "explanation": "Sulphur exists as S8, a molecule of eight atoms, hence polyatomic (octatomic).", "knowledge_point": "Atomicity", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "The subatomic particles present in an atom are:", "options": ["A. protons, photons, electrons", "B. protons only", "C. neutrons, electrons, ions", "D. protons, neutrons, electrons"], "answer": "D", "explanation": "An atom is built up of three sub-atomic particles: protons, neutrons and electrons.", "knowledge_point": "Structure of atom", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Protons are found in the:", "options": ["A. orbits/shells", "B. outside the atom", "C. nucleus", "D. outer shell only"], "answer": "C", "explanation": "Protons and neutrons are present in the nucleus at the centre of the atom.", "knowledge_point": "Structure of atom", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "The charge of a neutron is:", "options": ["A. -1", "B. 0", "C. +2", "D. +1"], "answer": "B", "explanation": "A neutron has no charge (neutral).", "knowledge_point": "Subatomic particles", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "The charge of a proton is:", "options": ["A. -1", "B. 0", "C. +1", "D. +2"], "answer": "C", "explanation": "A proton has a positive charge of +1.", "knowledge_point": "Subatomic particles", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "The charge of an electron is:", "options": ["A. 0", "B. +2", "C. +1", "D. -1"], "answer": "D", "explanation": "An electron has a negative charge of -1.", "knowledge_point": "Subatomic particles", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Atomic number equals the number of:", "options": ["A. protons only", "B. protons = electrons (in a neutral atom)", "C. protons + neutrons", "D. neutrons"], "answer": "B", "explanation": "Atomic number = number of protons = number of electrons in a neutral atom.", "knowledge_point": "Atomic number", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Carbon has atomic number 6 and mass number 12. Its number of neutrons is:", "options": ["A. 2", "B. 12", "C. 4", "D. 6"], "answer": "D", "explanation": "Neutrons = mass number - atomic number = 12 - 6 = 6.", "knowledge_point": "Mass number", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "Mass number of an atom equals:", "options": ["A. number of protons + electrons", "B. number of protons + neutrons", "C. number of electrons + neutrons", "D. number of protons only"], "answer": "B", "explanation": "Mass number = number of protons + number of neutrons.", "knowledge_point": "Mass number", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Who discovered electrons?", "options": ["A. J. J. Thomson", "B. Rutherford", "C. Goldstein", "D. James Chadwick"], "answer": "A", "explanation": "J. J. Thomson (1897) discovered electrons while studying the structure of atoms.", "knowledge_point": "Discovery of atom", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "Who discovered protons?", "options": ["A. Rutherford", "B. Goldstein", "C. Chadwick", "D. Thomson"], "answer": "B", "explanation": "Goldstein (1898) discovered protons (positively charged particles).", "knowledge_point": "Discovery of atom", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "Who discovered the atomic nucleus?", "options": ["A. Chadwick", "B. Thomson", "C. Rutherford", "D. Goldstein"], "answer": "C", "explanation": "Rutherford (1911) discovered the atomic nucleus.", "knowledge_point": "Discovery of atom", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "Who discovered neutrons?", "options": ["A. Goldstein", "B. James Chadwick", "C. Thomson", "D. Rutherford"], "answer": "B", "explanation": "James Chadwick (1932) discovered neutrons.", "knowledge_point": "Discovery of atom", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "true_false", "prompt": "Dalton's atomic theory stated that atoms are indestructible and indivisible.", "answer": "True", "explanation": "Dalton (1803) proposed that atoms are indestructible and indivisible.", "knowledge_point": "Dalton's atomic theory", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "true_false", "prompt": "Modern atomic theory states that atoms are destructible and divisible into protons, electrons and neutrons.", "answer": "True", "explanation": "Modern atomic theory holds that atoms are divisible into sub-atomic particles.", "knowledge_point": "Modern atomic theory", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "Valency of an element is the number of:", "options": ["A. electrons in the outer shell", "B. hydrogen atoms with which it combines or displaces", "C. protons", "D. neutrons"], "answer": "B", "explanation": "Valency is the number of hydrogen atoms with which an element combines or displaces forming a compound.", "knowledge_point": "Valency", "category": "Chemistry / Atomic Structure", "level": 1, "memory_tip": "🧠 Valency = combining capacity with H"}, {"type": "single_choice", "prompt": "Valency of oxygen is:", "options": ["A. 3", "B. 2", "C. 4", "D. 1"], "answer": "B", "explanation": "Oxygen has valency 2 (divalent).", "knowledge_point": "Valency", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Valency of chlorine is:", "options": ["A. 1", "B. 3", "C. 2", "D. 4"], "answer": "A", "explanation": "Chlorine has valency 1 (monovalent).", "knowledge_point": "Valency", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Valency of nitrogen is:", "options": ["A. 4", "B. 3", "C. 1", "D. 2"], "answer": "B", "explanation": "Nitrogen has valency 3 (trivalent).", "knowledge_point": "Valency", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "Which element exhibits variable valency?", "options": ["A. Helium", "B. Sodium", "C. Copper", "D. Neon"], "answer": "C", "explanation": "Copper exhibits variable valency (Cu+ and Cu2+).", "knowledge_point": "Variable valency", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "Copper can have valency:", "options": ["A. 3", "B. 1 only", "C. 2 only", "D. 1 and 2"], "answer": "D", "explanation": "Copper shows valencies 1 (Cu+) and 2 (Cu2+).", "knowledge_point": "Variable valency", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "Iron can have valency:", "options": ["A. 3 only", "B. 2 and 3", "C. 2 only", "D. 1 and 2"], "answer": "B", "explanation": "Iron shows valencies 2 (Fe2+) and 3 (Fe3+).", "knowledge_point": "Variable valency", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "The chemical formula of magnesium chloride is:", "options": ["A. Mg2Cl", "B. MgCl", "C. MgCl2", "D. Mg2Cl2"], "answer": "C", "explanation": "Mg (valency 2) combines with Cl (valency 1): MgCl2.", "knowledge_point": "Chemical formula", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "The formula of iron(III) oxide is:", "options": ["A. Fe3O2", "B. FeO3", "C. Fe2O3", "D. FeO"], "answer": "C", "explanation": "Fe (valency 3) and O (valency 2) give Fe2O3.", "knowledge_point": "Chemical formula", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "In a salt, the positive part is called the:", "options": ["A. basic radical", "B. anion", "C. acid radical", "D. cation only"], "answer": "A", "explanation": "The positive part is called the basic radical (e.g. Na+).", "knowledge_point": "Radicals", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "A negative radical behaves like a:", "options": ["A. non-metal", "B. hydrogen atom", "C. metal", "D. proton"], "answer": "A", "explanation": "A negative radical behaves like a non-metal in a chemical reaction.", "knowledge_point": "Radicals", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "A cation is:", "options": ["A. a negatively charged ion", "B. a positively charged ion", "C. a neutral atom", "D. a radical"], "answer": "B", "explanation": "Cations are positively charged ions (e.g. Na+).", "knowledge_point": "Ions", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "An anion is:", "options": ["A. a positively charged ion", "B. a neutral atom", "C. a radical", "D. a negatively charged ion"], "answer": "D", "explanation": "Anions are negatively charged ions (e.g. Cl-).", "knowledge_point": "Ions", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "The formula of the ammonium radical is:", "options": ["A. NH3", "B. NH2", "C. NH4-", "D. NH4+"], "answer": "D", "explanation": "Ammonium radical is NH4+ (1 N + 4 H).", "knowledge_point": "Radicals", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "single_choice", "prompt": "The formula of the carbonate radical is:", "options": ["A. HCO3-", "B. CO2", "C. CO3", "D. CO3^2-"], "answer": "D", "explanation": "Carbonate radical is CO3^2- (1 C + 3 O).", "knowledge_point": "Radicals", "category": "Chemistry / Atomic Structure", "level": 1}, {"type": "true_false", "prompt": "A chemical equation must be balanced to comply with the law of conservation of matter.", "answer": "True", "explanation": "Matter is neither created nor destroyed in a chemical reaction; atom counts must match.", "knowledge_point": "Chemical equation", "category": "Chemistry / Atomic Structure", "level": 2}, {"type": "single_choice", "prompt": "The group number in the Modern Periodic Table signifies the:", "options": ["A. number of protons", "B. number of electrons in the outer shell", "C. mass number", "D. valency of metals only"], "answer": "B", "explanation": "Group number = number of electrons in the outer shell of an atom of that element.", "knowledge_point": "Periodic table", "category": "Chemistry / Atomic Structure", "level": 2}];
-window.__META__ = {"id": "q_1794750649", "title": "📚 Chemistry · Atomic Structure", "subtitle": "共 40 题 · 选择×36 · 判断×4 · Chemistry"};
-</script>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="gradA" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ecdc4"/><stop offset="100%" stop-color="#4f9de8"/>
+    </linearGradient>
+  </defs>
+</svg>
 
 <script>
-'use strict';
+(() => {
+"use strict";
+/* ══════════════════════════════════════════════════════════════
+   html-quiz runtime — self-contained, no libraries, no network.
+   Question data is parsed from the #quiz-data script tag.
+   ══════════════════════════════════════════════════════════════ */
 
-/* ============================================
- * Quiz Engine - K12 StudyBuddy 4.0
- * 受 v15 启发，针对 K12 多学科多题型优化
- * ============================================ */
-const META = window.__META__ || {};
-const STORAGE_KEY = 'k12_quiz_' + (META.id || 'default');
-const FILTER_KEY = STORAGE_KEY + '_filter';
-const CATS_KEY = STORAGE_KEY + '_cats';
-const THEME_KEY = 'k12_quiz_theme';
-
-const TYPE_LABELS = {
-  single_choice: { txt: '选择', cls: 'type-choice' },
-  true_false:    { txt: '判断', cls: 'type-tf' },
-  fill_blank:    { txt: '填空', cls: 'type-blank' },
-  short_answer:  { txt: '简答', cls: 'type-short' }
+// ── Data & config ─────────────────────────────────────────────
+const QUIZ = JSON.parse(document.getElementById('quiz-data').textContent.trim());
+const params = new URLSearchParams(location.search);
+const cfg = {
+  secs: parseTimerSecs(),                 // 0 = no timer (unlimited); ?secs=N (2-60) restores a timer
+  max:  clampInt(params.get('max'), 25, 1, 100),   // (informational only; cap applied at build)
+  tts:  params.get('tts') !== 'off' && params.get('tts') !== '0'
 };
-const LEVEL_LABELS = { 1: 'L1·识记', 2: 'L2·理解', 3: 'L3·应用' };
-const STATE_LABELS = { mastered: '✅ 已掌握', unstudied: '⬜ 未做', error: '❌ 错题' };
+function clampInt(v, d, lo, hi){ const n = parseInt(v,10); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; }
+function parseTimerSecs(){
+  const raw = params.get('secs');
+  if (raw === null || raw === '' || raw === '0') return 0;   // default: unlimited time
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) ? Math.min(60, Math.max(2, n)) : 0;
+}
 
-let QS = [];                 // 全部题目（含 id）
-let states = {};             // {id: 'mastered'|'unstudied'|'error'}
-let answered = {};           // {id: userAnswer}
-let activeFilters = { mastered: true, unstudied: true, error: true };
-let activeCats = new Set();  // 当前激活的学科
-let currentId = null;
-let filteredIds = [];
-
-/* ===== 启动 ===== */
-function init() {
-  // 主题恢复（默认 light）
-  try {
-    const t = localStorage.getItem(THEME_KEY);
-    if (t === 'dark') {
-      document.body.classList.remove('light');
-      document.body.classList.add('dark');
-      document.querySelector('.theme-toggle').textContent = '🌙';
+// Build a flat ordered question list across all sections.
+// The quiz engine randomizes option order at runtime (the extraction step keeps
+// correctIndex aligned with the source order), so correct answers are not all
+// stuck on option A. Track correctIndex through the permutation.
+const FLAT = [];
+QUIZ.sections.forEach(s => {
+  s.questions.forEach(q => {
+    if (Array.isArray(q.options) && q.options.length > 1) {
+      const perm = shuffle(q.options.map((_, i) => i));
+      const newOpts = perm.map(i => q.options[i]);
+      const newCorrect = perm.indexOf(q.correctIndex);
+      q.options = newOpts;
+      if (newCorrect >= 0) q.correctIndex = newCorrect;
     }
-  } catch (e) {}
-
-  // 强制按数组下标重排 id：忽略题目原始 id 字段（可能是字符串或冲突值）
-  QS = (window.__QUIZ_DATA__ || []).map((q, i) => Object.assign({}, q, { id: i + 1, _origId: q.id }));
-  if (QS.length === 0) {
-    document.getElementById('leftScroll').innerHTML = '<div style="padding:20px;color:#a8adbd;font-size:13px;text-align:center;">题库为空，请先导入题目</div>';
-    return;
-  }
-
-  loadState();
-  loadFilters();
-  buildCatChips();
-  buildSidebar();
-  applyFilters();
-  updateStats();
-
-  // 默认选中筛选结果中的第 1 题（首次进入不再是空白态）
-  if (filteredIds.length > 0) selectQ(filteredIds[0]);
-}
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const obj = JSON.parse(raw);
-      states = obj.states || {};
-      answered = obj.answered || {};
-    }
-  } catch (e) { states = {}; answered = {}; }
-  QS.forEach(q => { if (!states[q.id]) states[q.id] = 'unstudied'; });
-}
-
-function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ states, answered })); } catch (e) {}
-}
-
-function loadFilters() {
-  try {
-    const raw = localStorage.getItem(FILTER_KEY);
-    if (raw) activeFilters = Object.assign(activeFilters, JSON.parse(raw));
-  } catch (e) {}
-  document.querySelectorAll('.sf-btn').forEach(btn => {
-    if (!activeFilters[btn.dataset.f]) btn.classList.add('off');
+    FLAT.push({ q, sectionId: s.id, sectionTitle: s.title });
   });
+});
+const TOTAL = FLAT.length;
 
-  // 学科：默认全选（只取一级分类）
-  const cats = [...new Set(QS.map(getCatKey))];
-  try {
-    const raw = localStorage.getItem(CATS_KEY);
-    const arr = raw ? JSON.parse(raw) : null;
-    activeCats = new Set(Array.isArray(arr) && arr.length ? arr : cats);
-  } catch (e) { activeCats = new Set(cats); }
-}
-
-/* ===== 分类解析 =====
-   category 形如 "通用类 / 1.中华人民共和国证券法（…）"：
-     一级（顶部 chip + 侧栏顶 cat-top）= 斜杠前的 "通用类"
-     二级（侧栏 cat-sub-top，法规名）  = 斜杠后剩余部分
-   knowledge_point 形如 "一、法律/1.中华人民共和国证券法（…）/《证券法》适用范围"：
-     真正的知识点 = 最后一段 "《证券法》适用范围"
-   既兼容旧扁平数据（无斜杠），又把 badcase 里冗余的层级路径清掉。
-*/
-function splitCat(raw) {
-  const s = (raw || '通用').trim();
-  const i = s.indexOf('/');
-  if (i < 0) return { top: s, sub: '' };
-  return { top: s.slice(0, i).trim() || '通用', sub: s.slice(i + 1).trim() };
-}
-function getCatKey(q) {
-  return splitCat(q.category).top;
-}
-function getSubCat(q) {
-  return splitCat(q.category).sub;
-}
-function getKpLeaf(q) {
-  const raw = (q.knowledge_point || q.knowledge || '').trim();
-  if (!raw) return '未分类';
-  const parts = raw.split('/').map(s => s.trim()).filter(Boolean);
-  return parts.length ? parts[parts.length - 1] : '未分类';
-}
-function buildCatChips() {
-  const cats = [...new Set(QS.map(getCatKey))];
-  const counts = {};
-  cats.forEach(c => { counts[c] = QS.filter(q => getCatKey(q) === c).length; });
-
-  const wrap = document.getElementById('catFilter');
-  wrap.querySelectorAll('.cat-chip').forEach(el => el.remove());
-  cats.forEach(c => {
-    const chip = document.createElement('span');
-    chip.className = 'cat-chip' + (activeCats.has(c) ? ' active' : '');
-    chip.dataset.cat = c;
-    chip.innerHTML = `${escapeHtml(c)}<span class="chip-count">${counts[c]}</span>`;
-    chip.onclick = () => toggleCat(c, chip);
-    wrap.appendChild(chip);
-  });
-}
-
-function toggleCat(cat, el) {
-  if (activeCats.has(cat)) {
-    if (activeCats.size <= 1) return;  // 至少保留一个
-    activeCats.delete(cat);
-    el.classList.remove('active');
-  } else {
-    activeCats.add(cat);
-    el.classList.add('active');
-  }
-  try { localStorage.setItem(CATS_KEY, JSON.stringify([...activeCats])); } catch (e) {}
-  buildSidebar();
-  applyFilters();
-}
-
-/* ===== 侧栏 ===== */
-function buildSidebar() {
-  // 三层：一级分类 → 法规（category 后段） → 知识点（knowledge_point 最后一段）
-  const groups = {};
-  QS.forEach(q => {
-    const cat = getCatKey(q);
-    if (!activeCats.has(cat)) return;
-    const law = getSubCat(q) || '通用';   // 二级：法规名
-    const kp = getKpLeaf(q);              // 三级：知识点叶子
-    if (!groups[cat]) groups[cat] = {};
-    if (!groups[cat][law]) groups[cat][law] = {};
-    if (!groups[cat][law][kp]) groups[cat][law][kp] = [];
-    groups[cat][law][kp].push(q);
-  });
-
-  const container = document.getElementById('leftScroll');
-  container.innerHTML = '';
-  Object.keys(groups).forEach(cat => {
-    const laws = groups[cat];
-    const lawKeys = Object.keys(laws);
-    const total = Object.values(laws).reduce(
-      (s, kps) => s + Object.values(kps).reduce((n, arr) => n + arr.length, 0), 0
-    );
-
-    // 兜底：如果该一级下没有任何有效二级 / 三级（法规名都是"通用" 且 知识点都是"未分类"），
-    // 直接平铺题号，避免出现一个孤零零的"未分类"中间层
-    const hasLaw = lawKeys.some(l => l && l !== '通用');
-    const hasKp = lawKeys.some(l => Object.keys(laws[l]).some(k => k && k !== '未分类'));
-    const flat = !hasLaw && !hasKp;
-
-    let html = `<div class="cat-group"><div class="cat-top">📂 ${escapeHtml(cat)} <span class="cat-count">${total}题</span></div>`;
-
-    if (flat) {
-      // 收集所有题号，按 id 排序后一把铺出来
-      const allQs = [];
-      lawKeys.forEach(l => Object.values(laws[l]).forEach(arr => allQs.push(...arr)));
-      allQs.sort((a, b) => a.id - b.id);
-      html += `<div class="cat-sub cat-sub-flat"><div class="cat-nums">`;
-      allQs.forEach(q => {
-        const st = states[q.id] || 'unstudied';
-        html += `<span class="qnum ${st}" data-id="${q.id}" onclick="selectQ(${q.id})">${q.id}</span>`;
-      });
-      html += `</div></div>`;
-    } else {
-      lawKeys.forEach(law => {
-        const kps = laws[law];
-        const lawTotal = Object.values(kps).reduce((n, arr) => n + arr.length, 0);
-        // 法规名长，可能换行；用 title 兜底显示完整原文
-        if (law && law !== '通用') {
-          html += `<div class="cat-law" title="${escapeHtml(law)}"><span class="cat-law-name">${escapeHtml(law)}</span><span class="cat-law-count">${lawTotal}</span></div>`;
-        }
-        Object.keys(kps).forEach(kp => {
-          html += `<div class="cat-sub"><div class="cat-sub-name" title="${escapeHtml(kp)}">${escapeHtml(kp)}</div><div class="cat-nums">`;
-          kps[kp].forEach(q => {
-            const st = states[q.id] || 'unstudied';
-            html += `<span class="qnum ${st}" data-id="${q.id}" onclick="selectQ(${q.id})">${q.id}</span>`;
-          });
-          html += `</div></div>`;
-        });
-      });
-    }
-
-    html += `</div>`;
-    container.insertAdjacentHTML('beforeend', html);
-  });
-}
-
-function applyStatesToDOM() {
-  document.querySelectorAll('.qnum').forEach(el => {
-    el.classList.remove('mastered', 'unstudied', 'error');
-    const id = parseInt(el.dataset.id, 10);
-    el.classList.add(states[id] || 'unstudied');
-  });
-}
-
-function updateStats() {
-  let m = 0, u = 0, e = 0;
-  QS.forEach(q => {
-    if (!activeCats.has(getCatKey(q))) return;
-    const s = states[q.id] || 'unstudied';
-    if (s === 'mastered') m++;
-    else if (s === 'error') e++;
-    else u++;
-  });
-  document.getElementById('numMastered').textContent = m;
-  document.getElementById('numUnstudied').textContent = u;
-  document.getElementById('numError').textContent = e;
-  const total = m + u + e;
-  document.getElementById('progressTxt').textContent = `${m}/${total}`;
-}
-
-/* ===== 过滤 ===== */
-function toggleFilter(type, btn) {
-  activeFilters[type] = !activeFilters[type];
-  btn.classList.toggle('off', !activeFilters[type]);
-  try { localStorage.setItem(FILTER_KEY, JSON.stringify(activeFilters)); } catch (e) {}
-  applyFilters();
-}
-
-function applyFilters() {
-  filteredIds = [];
-  document.querySelectorAll('.qnum').forEach(el => {
-    const id = parseInt(el.dataset.id, 10);
-    const st = states[id] || 'unstudied';
-    const visible = activeFilters[st];
-    el.classList.toggle('filtered-out', !visible);
-    if (visible) filteredIds.push(id);
-  });
-  updateStats();
-  updateNav();
-}
-
-/* ===== 选题 + 渲染 ===== */
-window.selectQ = function (id) {
-  id = parseInt(id, 10);  // 防御：onclick 传进来如果是字符串先转 int
-  currentId = id;
-  document.querySelectorAll('.qnum').forEach(el => {
-    el.classList.toggle('active', parseInt(el.dataset.id, 10) === id);
-  });
-  const q = QS.find(x => x.id === id);
-  if (!q) { console.error('[selectQ] 找不到题目 id=' + id + '，QS 中 id 列表：', QS.map(x => x.id)); return; }
-  renderQuestion(q);
-  document.getElementById('navBar').style.display = 'flex';
-  updateNav();
-  // 移动端：选完自动收起侧栏
-  if (window.innerWidth <= 768) {
-    document.getElementById('sidebar').classList.add('hidden');
-  }
+// ── State machine ─────────────────────────────────────────────
+let state = {
+  mode: 'intro',        // intro | question | revealed | results
+  scope: null,          // null = all sections, else sectionId
+  list: [],             // ordered [{q, sectionId, sectionTitle}] for current scope
+  iq: 0,
+  answers: [],          // {qid, chosen(-1=timeout), status, pts}
+  score: 0,
+  runToken: 0,
+  transitioning: false
 };
 
-function renderQuestion(q) {
-  const typeInfo = TYPE_LABELS[q.type] || { txt: '题', cls: 'type-choice' };
-  const lvl = LEVEL_LABELS[q.level] || '';
-  const kp = q.knowledge_point || q.knowledge || '';
-  const st = states[q.id] || 'unstudied';
+const elStage  = document.getElementById('stage');
+const elScore  = document.getElementById('score-chip');
+const elProg   = document.getElementById('progress-fill');
+const elTree   = document.getElementById('tree');
+const elSide   = document.getElementById('sidebar');
+const overlay  = document.getElementById('overlay');
+const elMute   = document.getElementById('mute-btn');
+let muted = false;
 
-  let html = `<div class="q-card">
-    <div class="q-meta">
-      <span class="q-id">Q${q.id}</span>
-      <span class="q-tag ${typeInfo.cls}">${typeInfo.txt}</span>
-      ${lvl ? `<span class="q-tag level">${lvl}</span>` : ''}
-      <button class="q-state-btn ${st}" id="qStateBtn" onclick="cycleState()" title="点击手动切换：未做 → 已掌握 → 错题">${STATE_LABELS[st]} <span style="opacity:.5;font-weight:400;">▾</span></button>
-      ${kp ? `<span class="q-knowledge" title="${escapeHtml(kp)}">🏷️ ${escapeHtml(kp)}</span>` : ''}
-    </div>
-    <div class="q-text">${renderMD(q.prompt || q.question)}</div>`;
+// ── DOM helpers (NO innerHTML anywhere) ───────────────────────
+const h = (tag, cls, text) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;   // untrusted text → textContent only
+  return e;
+};
+function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
 
-  if (q.type === 'single_choice') {
-    html += `<div class="opts" id="qOpts">`;
-    (q.options || []).forEach((opt, i) => {
-      const m = opt.match(/^([A-Z])[\.\、]\s*(.+)/);
-      const letter = m ? m[1] : String.fromCharCode(65 + i);
-      const text = m ? m[2] : opt;
-      html += `<div class="opt" data-key="${letter}" onclick="chooseOpt(this,'${letter}',${q.id})">
-        <span class="letter">${letter}</span><span class="text">${renderMD(text)}</span>
-      </div>`;
+// ── Sound (WebAudio, synthesised; lazy context for autoplay) ─
+let AC = null;
+function ensureAudio(){
+  if (!AC){ try{ AC = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return null; } }
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function blip(freq, dur, type, delay, vol){
+  const ac = AC || ensureAudio();
+  if (!ac) return;
+  const t0 = ac.currentTime + (delay || 0);
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol || 0.14, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(t0); o.stop(t0 + dur + 0.03);
+}
+const sTick   = () => blip(880, 0.06, 'square');
+const sCorrect= () => { blip(523,0.12,'sine',0); blip(659,0.12,'sine',0.11); blip(784,0.2,'sine',0.22); };
+const sWrong  = () => { blip(220,0.22,'triangle',0); blip(170,0.28,'triangle',0.14); };
+const sTimesUp= () => { blip(440,0.18,'triangle',0); blip(330,0.3,'triangle',0.16); };
+const sPop    = () => { blip(660,0.09,'sine',0,0.1); blip(880,0.1,'sine',0.07,0.08); };
+
+// ── TTS (Web Speech API) ──────────────────────────────────────
+function ttsAvailable(){ return 'speechSynthesis' in window; }
+function pickVoice(){
+  if (!ttsAvailable()) return null;
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v => /^en/i.test(v.lang)) || vs[0] || null;
+}
+function speak(text, onEnd){
+  if (!cfg.tts || muted || !ttsAvailable() || !text) { if (onEnd) onEnd(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1; u.pitch = 1.05;
+  const v = pickVoice(); if (v) u.voice = v;
+  if (onEnd) u.onend = onEnd;
+  speechSynthesis.speak(u);
+}
+if ('speechSynthesis' in window){
+  speechSynthesis.onvoiceschanged = () => {};   // warm the voice list
+}
+
+// ── Timer ring ────────────────────────────────────────────────
+let rafId = 0;
+function stopTimer(){ if (rafId){ cancelAnimationFrame(rafId); rafId = 0; } }
+function startTimer(secs, token){
+  stopTimer();
+  const C = 2 * Math.PI * 30;                    // r=30 ring
+  const ring = document.getElementById('ring-fg');
+  const count = document.getElementById('t-count');
+  const wrap = document.getElementById('timer-wrap');
+  ring.setAttribute('stroke-dasharray', C);
+  ring.setAttribute('stroke-dashoffset', 0);
+  const deadline = performance.now() + secs * 1000;
+  let lastSec = Math.ceil(secs);
+  const loop = (now) => {
+    if (state.runToken !== token) return;        // stale — question changed
+    const remMs = deadline - now;
+    const remSec = Math.max(0, Math.ceil(remMs / 1000));
+    const frac = Math.max(0, Math.min(1, remMs / (secs * 1000)));
+    ring.setAttribute('stroke-dashoffset', String(C * (1 - frac)));   // SVG attr, not CSS
+    count.textContent = String(remSec);
+    wrap.classList.toggle('low', remSec <= 3);
+    if (remSec < lastSec){ lastSec = remSec; if (remSec > 0 && remSec <= 3 && state.mode === 'question') sTick(); }
+    if (remMs <= 0){ onTimeout(token); return; }
+    rafId = requestAnimationFrame(loop);
+  };
+  rafId = requestAnimationFrame(loop);
+}
+
+// ── Timer markup builder (returned to slot in question card) ──
+function timerMarkup(){
+  if (cfg.secs <= 0) return null;          // no-timer mode: no ring, no countdown
+  const wrap = h('div', 'timer-wrap'); wrap.id = 'timer-wrap';
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 74 74');
+  const bg = document.createElementNS(ns, 'circle');
+  bg.setAttribute('cx','37'); bg.setAttribute('cy','37'); bg.setAttribute('r','30'); bg.setAttribute('class','circle-bg');
+  const fg = document.createElementNS(ns, 'circle');
+  fg.setAttribute('cx','37'); fg.setAttribute('cy','37'); fg.setAttribute('r','30'); fg.setAttribute('class','circle-fg');
+  fg.id = 'ring-fg';
+  svg.appendChild(bg); svg.appendChild(fg);
+  const c = h('div', 't-count', String(cfg.secs)); c.id = 't-count';
+  wrap.appendChild(svg); wrap.appendChild(c);
+  return wrap;
+}
+
+// ── Confetti ──────────────────────────────────────────────────
+const CONF_COLORS = ['#ff6b6b','#ffd93d','#2ecc71','#4f9de8','#9b59b6','#ff9d2e'];
+function burstConfetti(n){
+  const layer = document.getElementById('confetti');
+  for (let i = 0; i < n; i++){
+    const c = h('div', 'confetti');
+    c.style.left = (Math.random() * 100) + 'vw';
+    c.style.background = CONF_COLORS[i % CONF_COLORS.length];
+    c.style.setProperty('--rx', (Math.random() * 540 - 270) + 'deg');
+    c.style.animationDuration = (1.6 + Math.random() * 1.6) + 's';
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    c.style.width = (7 + Math.random() * 8) + 'px';
+    c.style.height = (7 + Math.random() * 8) + 'px';
+    c.addEventListener('animationend', () => c.remove());
+    layer.appendChild(c);
+  }
+}
+
+// ── Tree building ─────────────────────────────────────────────
+function renderTree(){
+  clear(elTree);
+  QUIZ.sections.forEach(sec => {
+    const node = h('div', 'tree-node');
+    node.setAttribute('data-sec', sec.id);
+    const arrow = h('span', 'arrow', '▶');
+    const dot = h('span', 'dot');
+    dot.style.background = sectionColor(sec.id);
+    const label = h('span', null, sec.emoji + ' ' + sec.title);
+    const badge = h('span', 'badge', String(sec.questions.length));
+    node.appendChild(arrow); node.appendChild(dot); node.appendChild(label); node.appendChild(badge);
+    node.addEventListener('click', () => {
+      arrow.classList.toggle('open');
+      const kids = document.getElementById('children-' + sec.id);
+      if (kids) kids.classList.toggle('open');
     });
-    html += `</div>`;
-  } else if (q.type === 'true_false') {
-    html += `<div class="opts" id="qOpts">
-      <div class="opt" data-key="True" onclick="chooseOpt(this,'True',${q.id})"><span class="letter">✓</span><span class="text">正确</span></div>
-      <div class="opt" data-key="False" onclick="chooseOpt(this,'False',${q.id})"><span class="letter">✗</span><span class="text">错误</span></div>
-    </div>`;
-  } else if (q.type === 'fill_blank') {
-    html += `<input class="q-input short" id="qInput" placeholder="在这里输入你的答案..." />`;
-  } else if (q.type === 'short_answer') {
-    html += `<textarea class="q-input long" id="qInput" placeholder="在这里写下你的回答..."></textarea>`;
-  }
+    elTree.appendChild(node);
 
-  if (q.type === 'fill_blank' || q.type === 'short_answer') {
-    html += `<div class="q-actions">
-      <button class="btn-submit" id="btnSubmit" onclick="submitTextAnswer(${q.id})">提交 (Enter)</button>
-      <button class="btn-reveal" onclick="revealAnswer(${q.id})">查看答案</button>
-      <button class="btn-reset" onclick="resetQ(${q.id})">↻ 重做</button>
-    </div>`;
+    const kids = h('div', 'tree-children');
+    kids.id = 'children-' + sec.id;
+    sec.questions.forEach(q => {
+      const leaf = h('div', 'tree-node tree-leaf');
+      leaf.setAttribute('data-qid', q.id);
+      const qn = h('span', null, 'Q' + (FLAT.length ? '' : '') + q.id.split('-q')[1]);
+      const st = h('span', 'st');
+      leaf.appendChild(h('span', 'arrow', '•'));
+      leaf.appendChild(qn); leaf.appendChild(st);
+      leaf.addEventListener('click', () => startAtSection(sec.id, q.id));
+      kids.appendChild(leaf);
+    });
+    elTree.appendChild(kids);
+  });
+}
+function sectionColor(id){
+  const pal = ['#4ecdc4','#ffb300','#9b59b6','#4f9de8','#ff6b6b','#2ecc71','#e67e22','#e84393'];
+  let x = 0; for (const ch of id) x = (x + ch.charCodeAt(0)) % pal.length;
+  return pal[x];
+}
+function updateTreeStatus(){
+  const answered = new Map(state.answers.map(a => [a.qid, a.status]));
+  document.querySelectorAll('#tree .tree-leaf').forEach(leaf => {
+    const st = leaf.querySelector('.st');
+    const qid = leaf.getAttribute('data-qid');
+    const s = answered.get(qid);
+    st.textContent = '';
+    st.className = 'st';
+    if (s === 'correct'){ st.textContent = '✓'; st.classList.add('good'); }
+    else if (s === 'wrong'){ st.textContent = '✗'; st.classList.add('bad'); }
+    else if (s === 'timeout'){ st.textContent = '⏰'; st.classList.add('slow'); }
+  });
+  // highlight active section node
+  document.querySelectorAll('#tree .tree-node[data-sec]').forEach(n => {
+    n.classList.toggle('active', state.scope === null || n.getAttribute('data-sec') === state.scope);
+  });
+}
+
+// ── Scope / nav ───────────────────────────────────────────────
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function startScope(scopeId){
+  state.scope = scopeId || null;
+  if (state.scope) {
+    state.list = FLAT.filter(f => f.sectionId === state.scope);
   } else {
-    html += `<div class="q-actions">
-      <button class="btn-submit" id="btnSubmit" onclick="submitChoice(${q.id})" disabled>提交 (Enter)</button>
-      <button class="btn-reveal" onclick="revealAnswer(${q.id})">查看答案</button>
-      <button class="btn-reset" onclick="resetQ(${q.id})">↻ 重做</button>
-    </div>`;
+    // group by section, shuffle sections, keep questions in source order within each
+    const bySec = [];
+    const secOrder = [];
+    FLAT.forEach(f => { if (!secOrder.includes(f.sectionId)) secOrder.push(f.sectionId); });
+    secOrder.forEach(sid => bySec.push(FLAT.filter(f => f.sectionId === sid)));
+    state.list = shuffle(bySec).flat();
   }
+  state.iq = 0; state.answers = []; state.score = 0; state.runToken++;
+  updateScore();
+  if (state.list.length === 0){ renderIntro(); return; }
+  renderQuestion();
+}
+function startAtSection(secId, qid){
+  state.scope = secId;
+  state.list = FLAT.filter(f => f.sectionId === secId);
+  const idx = state.list.findIndex(f => f.q.id === qid);
+  state.iq = idx >= 0 ? idx : 0;
+  state.answers = []; state.score = 0; state.runToken++;
+  updateScore();
+  closeDrawer();
+  renderQuestion();
+}
+function currentQ(){
+  const f = state.list[state.iq];
+  return f ? f.q : null;
+}
 
-  html += `<div class="auto-state-hint" id="autoHint"></div>
-    <div class="analysis" id="analysis">
-      <div class="ans-line" id="ansLine"></div>
-      <div class="ans-text" id="ansText"></div>
-      <div class="tip" id="tipBox"></div>
-      <div class="kw" id="kwDetail"></div>
-    </div>
-  </div>`;
+// ── Views ─────────────────────────────────────────────────────
+function renderIntro(){
+  state.mode = 'intro';
+  clear(elStage);
+  const card = h('div', 'card intro card-in');
+  const big = h('div', 'big-emoji', QUIZ.emoji || '🧠');
+  const title = h('h1', null, QUIZ.title || 'Atomic Structure');
+  const sub = h('div', 'sub', QUIZ.subtitle || 'Test yourself & learn with fun quiz!');
+  const meta = h('div', 'meta-chip', '🎯 ' + TOTAL + ' questions · ⭐ up to ' + (TOTAL * 10) + ' points · ' + (cfg.secs > 0 ? '⏱️ ' + cfg.secs + 's each' : '⏱️ no time limit'));
+  const start = h('button', 'big-btn', '▶ Start Quiz');
+  start.addEventListener('click', () => { ensureAudio(); state.runToken++; startScope(null); });
+  card.appendChild(big); card.appendChild(title); card.appendChild(sub);
+  const row = h('div', 'ghost-row');
+  const samp = h('button', 'big-btn ghost', '🔊 Hear me');
+  samp.addEventListener('click', () => { ensureAudio(); speak('Hello friend! Let’s play and learn together!'); });
+  const imgAll = h('div', 'hint-line', 'Open a section in the left menu to play a single topic.');
+  row.appendChild(samp);
+  card.appendChild(meta); card.appendChild(start); card.appendChild(row); card.appendChild(imgAll);
+  elStage.appendChild(card);
+  updateProgress(0);
+}
+function speakQuestion(q, onEnd){
+  const all = 'Question ' + q.question + '. Options: ' +
+    q.options.map((o, i) => String.fromCharCode(65 + i) + '. ' + o).join('. ') + '.';
+  speak(all, onEnd);
+}
+function renderQuestion(){
+  state.mode = 'question';
+  const q = currentQ();
+  if (!q){ renderResults(); return; }
+  const token = ++state.runToken;
+  stopTimer();
+  clear(elStage);
+  const card = h('div', 'card card-in');
+  const head = h('div', 'q-head');
+  head.appendChild(h('div', 'q-progress', 'Question ' + (state.iq + 1) + ' of ' + state.list.length));
+  const tm = timerMarkup();
+  if (tm) head.appendChild(tm);
+  card.appendChild(head);
 
-  document.getElementById('rightInner').innerHTML = html;
+  // question text
+  card.appendChild(h('div', 'q-text', q.question));
 
-  // 恢复已答状态
-  if (answered[q.id] !== undefined) {
-    if (q.type === 'single_choice' || q.type === 'true_false') {
-      const el = document.querySelector(`#qOpts .opt[data-key="${answered[q.id]}"]`);
-      if (el) showChoiceAnswer(q, answered[q.id]);
+  // optional image
+  if (q.image){
+    const iw = h('div', 'qimg-wrap');
+    if (q.image.type === 'emoji'){
+      iw.appendChild(h('div', 'emoji-big', q.image.src));
     } else {
-      const inp = document.getElementById('qInput');
-      if (inp) { inp.value = answered[q.id]; inp.disabled = true; }
-      showTextAnswer(q, answered[q.id]);
+      const img = h('img', 'qimg');
+      img.setAttribute('src', q.image.src);
+      img.setAttribute('alt', q.image.alt || '');
+      iw.appendChild(img);
     }
+    if (q.image.caption) iw.appendChild(h('div', 'caption', q.image.caption));
+    card.appendChild(iw);
   }
-}
 
-/* ===== 选择题 / 判断题作答 =====
- * 新逻辑：选择 ≠ 提交
- * - 点选项：仅高亮，不锁定，不判分
- * - 点【提交】或按 Enter：判分；答错首次仅提示「再想想」并允许重选
- * - 答错第二次：才显示答案 + 标错题
- */
-window.__pendingChoice = null;
-window.__wrongTriedOnce = {};  // {id: true} 记录这题是否已经错过一次
-
-window.chooseOpt = function (el, key, id) {
-  // 已最终提交过的不能再选
-  if (answered[id] !== undefined) return;
-  window.__pendingChoice = key;
-  document.querySelectorAll('#qOpts .opt').forEach(o => {
-    o.classList.remove('selected');
+  // options
+  const opts = h('div', 'options');
+  q.options.forEach((text, i) => {
+    const b = h('button', 'opt');
+    b.setAttribute('data-idx', String(i));
+    b.appendChild(h('span', 'key', String.fromCharCode(65 + i)));
+    b.appendChild(h('span', null, text));
+    b.appendChild(h('span', 'mark'));
+    b.addEventListener('click', () => { ensureAudio(); if (state.mode === 'question') answer(i); });
+    opts.appendChild(b);
   });
-  el.classList.add('selected');
-  // 启用提交按钮
-  const btn = document.getElementById('btnSubmit');
-  if (btn) btn.disabled = false;
-};
+  card.appendChild(opts);
 
-window.submitChoice = function (id) {
-  const q = QS.find(x => x.id === id);
-  if (!q) return;
-  const key = window.__pendingChoice;
-  if (!key) { showRetryHint('先选一个选项呀～ 😊'); return; }
-  const stdU = String(q.answer || '').toUpperCase();
-  const correct = key.toUpperCase() === stdU;
+  // speak button
+  const foot = h('div', 'q-foot');
+  const spk = h('button', 'speak-btn', '🔊 Read aloud');
+  spk.addEventListener('click', () => { ensureAudio(); speakQuestion(q); });
+  foot.appendChild(spk);
+  card.appendChild(foot);
+  elStage.appendChild(card);
 
-  if (correct) {
-    answered[id] = key;
-    window.__wrongTriedOnce[id] = false;
-    showChoiceAnswer(q, key, true);
-    autoUpdateState(q, true);
-  } else {
-    if (!window.__wrongTriedOnce[id]) {
-      // 第一次错：给一次重试机会，不锁，不标错题
-      window.__wrongTriedOnce[id] = true;
-      const errOpt = document.querySelector(`#qOpts .opt[data-key="${key}"]`);
-      if (errOpt) {
-        errOpt.classList.add('wrong-shake');
-        setTimeout(() => errOpt.classList.remove('wrong-shake'), 600);
-      }
-      showRetryHint('🤔 不对哦，再想想？（这次错不算，可以重选）');
-      window.__pendingChoice = null;
-      if (errOpt) errOpt.classList.remove('selected');
-      return;
-    }
-    // 第二次错：真正锁定 + 标错题
-    answered[id] = key;
-    showChoiceAnswer(q, key, false);
-    autoUpdateState(q, false);
-  }
-};
-
-function showRetryHint(msg) {
-  const hint = document.getElementById('autoHint');
-  hint.className = 'auto-state-hint retry';
-  hint.textContent = msg;
-  // 自动消失
-  clearTimeout(window.__retryTimer);
-  window.__retryTimer = setTimeout(() => {
-    if (hint.classList.contains('retry')) {
-      hint.className = 'auto-state-hint';
-      hint.textContent = '';
-    }
-  }, 3500);
-}
-
-function showChoiceAnswer(q, chosen, correct) {
-  const stdU = String(q.answer || '').toUpperCase();
-  document.querySelectorAll('#qOpts .opt').forEach(el => {
-    el.classList.add('disabled');
-    el.classList.remove('selected');
-    const k = el.dataset.key.toUpperCase();
-    if (k === stdU) el.classList.add('correct');
-    if (k === String(chosen).toUpperCase() && k !== stdU) el.classList.add('wrong');
+  updateProgress(state.iq / state.list.length);
+  speakQuestion(q, () => {
+    if (state.runToken === token && state.mode === 'question' && cfg.secs > 0) startTimer(cfg.secs, token);
   });
-  // 提交按钮锁死
-  const btn = document.getElementById('btnSubmit');
-  if (btn) { btn.disabled = true; btn.textContent = '已提交'; }
-  showAnalysis(q, chosen, correct);
 }
+function reveal(q, status, chosen){
+  state.mode = 'revealed';
+  stopTimer();
+  state.answers.push({ qid: q.id, chosen, status, pts: status === 'correct' ? 10 : 0 });
+  if (status === 'correct') state.score += 10;
+  updateScore();
+  updateTreeStatus();
+  burstConfetti(status === 'correct' ? 60 : 0);
 
-/* ===== 填空 / 简答作答 ===== */
-window.submitTextAnswer = function (id) {
-  const q = QS.find(x => x.id === id);
-  if (!q) return;
-  const inp = document.getElementById('qInput');
-  const userAns = (inp && inp.value || '').trim();
-  if (!userAns) { alert('先写点答案再提交呀～ ✍️'); return; }
-  answered[id] = userAns;
-  inp.disabled = true;
-  document.getElementById('btnSubmit').disabled = true;
-  document.getElementById('btnSubmit').textContent = '已提交';
-
-  if (q.type === 'fill_blank') {
-    const correct = fuzzyMatch(userAns, q.answer);
-    showAnalysis(q, userAns, correct);
-    autoUpdateState(q, correct);
-  } else {
-    // 简答题：不强判
-    showAnalysis(q, userAns, null);
-    // 状态不动，由用户手动判定（点 q-state-btn）
-    saveState();
-  }
-};
-
-window.revealAnswer = function (id) {
-  const q = QS.find(x => x.id === id);
-  if (!q) return;
-  showAnalysis(q, answered[id] || '', null);
-};
-
-function showTextAnswer(q, userAns) {
-  if (q.type === 'fill_blank') {
-    const correct = fuzzyMatch(userAns, q.answer);
-    showAnalysis(q, userAns, correct);
-  } else {
-    showAnalysis(q, userAns, null);
-  }
-  const btn = document.getElementById('btnSubmit');
-  if (btn) { btn.disabled = true; btn.textContent = '已提交'; }
-}
-
-function fuzzyMatch(a, b) {
-  if (a === null || b === null || a === undefined || b === undefined) return false;
-  const norm = s => String(s).replace(/[\s\.,，。、；;:：!！?？""''""()（）]/g, '').toLowerCase();
-  return norm(a) === norm(b);
-}
-
-/* ===== 显示解析 ===== */
-function showAnalysis(q, userAns, correct) {
-  const an = document.getElementById('analysis');
-  const line = document.getElementById('ansLine');
-  const txt = document.getElementById('ansText');
-  const tip = document.getElementById('tipBox');
-  const kw = document.getElementById('kwDetail');
-
-  an.classList.remove('correct', 'wrong');
-  let lineHtml = '';
-  if (q.type === 'short_answer') {
-    lineHtml = `📝 参考答案：${renderMD(String(q.answer || ''))}`;
-  } else if (correct) {
-    an.classList.add('correct');
-    lineHtml = `🎉 答对啦！正确答案：<strong>${renderMD(String(q.answer || ''))}</strong>`;
-  } else if (correct === false) {
-    an.classList.add('wrong');
-    lineHtml = `❌ 你的答案是 <span style="text-decoration:line-through;opacity:.7;">${escapeHtml(userAns)}</span>，正确答案是 <strong>${renderMD(String(q.answer || ''))}</strong>`;
-  } else {
-    lineHtml = `📌 正确答案：<strong>${renderMD(String(q.answer || ''))}</strong>`;
-  }
-  line.innerHTML = lineHtml;
-
-  txt.innerHTML = q.explanation ? '<strong>💡 解析：</strong><br>' + renderMD(q.explanation) : '';
-  if (q.memory_tip) { tip.innerHTML = '🧠 ' + renderMD(q.memory_tip); tip.classList.add('visible'); }
-  else { tip.classList.remove('visible'); tip.innerHTML = ''; }
-  const knp = q.knowledge_point || q.knowledge;
-  kw.innerHTML = knp ? '📚 知识点：' + escapeHtml(knp) : '';
-
-  an.classList.add('visible');
-}
-
-/* ===== 状态自动 / 手动 ===== */
-function autoUpdateState(q, correct) {
-  const prev = states[q.id] || 'unstudied';
-  if (prev !== 'unstudied') { saveState(); return; }  // 已有状态不覆盖
-  states[q.id] = correct ? 'mastered' : 'error';
-  saveState();
-
-  const hint = document.getElementById('autoHint');
-  if (correct) {
-    hint.className = 'auto-state-hint mastered';
-    hint.textContent = '✅ 回答正确，状态自动更新为「已掌握」';
-  } else {
-    hint.className = 'auto-state-hint error';
-    hint.textContent = '❌ 这题答错了，已加入「错题本」～ 别灰心，多看看解析就掌握啦';
-  }
-  document.getElementById('qStateBtn').className = 'q-state-btn ' + states[q.id];
-  document.getElementById('qStateBtn').textContent = STATE_LABELS[states[q.id]];
-  applyStatesToDOM();
-  applyFilters();
-}
-
-window.cycleState = function () {
-  if (!currentId) return;
-  const order = ['unstudied', 'mastered', 'error'];
-  const cur = states[currentId] || 'unstudied';
-  const next = order[(order.indexOf(cur) + 1) % order.length];
-  states[currentId] = next;
-  saveState();
-  document.getElementById('qStateBtn').className = 'q-state-btn ' + next;
-  document.getElementById('qStateBtn').textContent = STATE_LABELS[next];
-  applyStatesToDOM();
-  applyFilters();
-};
-
-window.resetQ = function (id) {
-  states[id] = 'unstudied';
-  delete answered[id];
-  saveState();
-  selectQ(id);
-  applyStatesToDOM();
-  applyFilters();
-};
-
-/* ===== 导航 ===== */
-function updateNav() {
-  const info = document.getElementById('navInfo');
-  const prev = document.getElementById('prevBtn');
-  const next = document.getElementById('nextBtn');
-  if (!currentId || filteredIds.length === 0) { info.textContent = ''; prev.disabled = true; next.disabled = true; return; }
-  const idx = filteredIds.indexOf(currentId);
-  if (idx < 0) { info.textContent = `当前题在筛选外`; prev.disabled = true; next.disabled = true; return; }
-  info.textContent = `${idx + 1} / ${filteredIds.length}（当前筛选）`;
-  prev.disabled = idx <= 0;
-  next.disabled = idx >= filteredIds.length - 1;
-}
-
-window.goPrev = function () { const i = filteredIds.indexOf(currentId); if (i > 0) selectQ(filteredIds[i - 1]); };
-window.goNext = function () { const i = filteredIds.indexOf(currentId); if (i >= 0 && i < filteredIds.length - 1) selectQ(filteredIds[i + 1]); };
-
-/* ===== 随机抽题 ===== */
-window.randomQ = function () {
-  if (filteredIds.length === 0) { alert('当前筛选下没有题目 🙃'); return; }
-  selectQ(filteredIds[Math.floor(Math.random() * filteredIds.length)]);
-};
-
-/* ===== 导入导出 ===== */
-window.exportProgress = function () {
-  const data = { meta: META, states, answered, exportedAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `quiz_progress_${(META.id || 'quiz')}_${Date.now()}.json`; a.click();
-  URL.revokeObjectURL(url);
-};
-
-let importMode = 'questions';
-window.showImportModal = function (mode) {
-  importMode = mode;
-  document.getElementById('importTitle').textContent = mode === 'questions' ? '📥 导入题库' : '📂 导入进度';
-  document.getElementById('importHint').textContent = mode === 'questions'
-    ? '粘贴题目 JSON 数组（会覆盖当前题库）'
-    : '粘贴之前导出的进度 JSON';
-  document.getElementById('importText').value = '';
-  document.getElementById('importText').placeholder = mode === 'questions'
-    ? '[\n  {"type":"single_choice","prompt":"...","options":["A. ...","B. ..."],"answer":"A","explanation":"...","category":"数学","knowledge_point":"分数"}\n]'
-    : '{"states":{...},"answered":{...}}';
-  document.getElementById('importModal').classList.add('visible');
-};
-window.hideImportModal = function () { document.getElementById('importModal').classList.remove('visible'); };
-
-window.doImport = function () {
-  const txt = document.getElementById('importText').value.trim();
-  if (!txt) { alert('先粘贴点东西嘛 😊'); return; }
-  try {
-    const obj = JSON.parse(txt);
-    if (importMode === 'questions') {
-      if (!Array.isArray(obj)) { alert('题目必须是数组格式'); return; }
-      window.__QUIZ_DATA__ = obj;
-      states = {}; answered = {};
-      localStorage.removeItem(STORAGE_KEY);
-      QS = obj.map((q, i) => Object.assign({}, q, { id: i + 1, _origId: q.id }));
-      QS.forEach(q => { states[q.id] = 'unstudied'; });
-      buildCatChips();
-      buildSidebar();
-      applyFilters();
-      updateStats();
-      hideImportModal();
-      alert(`✅ 导入 ${obj.length} 道题`);
-    } else {
-      if (!obj.states) { alert('进度文件格式不对'); return; }
-      states = obj.states;
-      answered = obj.answered || {};
-      saveState();
-      applyStatesToDOM();
-      applyFilters();
-      hideImportModal();
-      alert('✅ 进度已恢复');
-    }
-  } catch (e) {
-    alert('❌ JSON 解析失败：' + e.message);
-  }
-};
-
-window.showResetModal = function () { document.getElementById('resetModal').classList.add('visible'); };
-window.hideResetModal = function () { document.getElementById('resetModal').classList.remove('visible'); };
-window.doReset = function () {
-  states = {}; answered = {};
-  QS.forEach(q => { states[q.id] = 'unstudied'; });
-  saveState();
-  applyStatesToDOM();
-  applyFilters();
-  hideResetModal();
-  document.getElementById('rightInner').innerHTML = '<div class="empty-state"><div class="icon">✨</div><div>已重置，重新开始！</div></div>';
-  document.getElementById('navBar').style.display = 'none';
-  currentId = null;
-};
-
-/* ===== 主题 ===== */
-window.toggleTheme = function () {
-  const isDark = document.body.classList.contains('dark');
-  document.body.classList.toggle('dark', !isDark);
-  document.body.classList.toggle('light', isDark);
-  document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
-  try { localStorage.setItem(THEME_KEY, isDark ? 'light' : 'dark'); } catch (e) {}
-};
-
-/* ===== 侧栏（移动） ===== */
-window.toggleSidebar = function () {
-  document.getElementById('sidebar').classList.toggle('hidden');
-};
-
-/* ============================================
- * 模拟考模式
- * ============================================ */
-let examConfig = { count: 10, timeLimit: 0 };
-let examQuestions = [];
-let examAnswers = {};
-let examTimerInterval = null;
-let examTimeLeft = 0;
-let examStartTime = 0;
-
-window.selectExamCount = function (n) {
-  examConfig.count = n;
-  document.querySelectorAll('#examModal [data-n]').forEach(b => {
-    b.classList.toggle('selected', parseInt(b.dataset.n, 10) === n);
+  const card = document.querySelector('#stage .card');
+  // banner
+  const banner = h('div', 'reveal-banner ' + (status === 'correct' ? 'good' : status === 'wrong' ? 'bad' : 'slow'));
+  const icon = status === 'correct' ? '✅' : status === 'wrong' ? '❌' : '⏰';
+  const msg = status === 'correct' ? 'Correct! Great job!' : status === 'wrong' ? 'Oops! Not quite.' : "Time's up!";
+  banner.appendChild(h('span', null, icon + ' ' + msg));
+  card.appendChild(banner);
+  // explanation
+  const exp = h('div', 'reveal-exp');
+  const b = h('b', null, '💡 '); b.textContent = '💡 ' + q.options[q.correctIndex];
+  exp.appendChild(b);
+  exp.appendChild(h('div', null, q.explanation));
+  card.appendChild(exp);
+  // highlight options
+  const buttons = card.querySelectorAll('.opt');
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    const mark = btn.querySelector('.mark');
+    if (i === q.correctIndex){ btn.classList.add('correct'); mark.textContent = '✓'; }
+    else if (i === chosen){ btn.classList.add('wrong-chosen'); mark.textContent = '✗'; }
+    else btn.classList.add('dim');
   });
-};
-window.selectExamTime = function (t) {
-  examConfig.timeLimit = t;
-  document.querySelectorAll('#examModal [data-t]').forEach(b => {
-    b.classList.toggle('selected', parseInt(b.dataset.t, 10) === t);
+  // next row
+  const row = h('div', 'next-row');
+  const pts = h('div', 'pts-gain ' + (status === 'correct' ? 'gain' : 'none'),
+                status === 'correct' ? '+10 points' : '+0 points');
+  const nb = h('button', 'next-btn', state.iq + 1 >= state.list.length ? 'See results 🏆' : 'Next ➡️');
+  nb.addEventListener('click', () => { state.iq++; if (state.iq >= state.list.length) renderResults(); else renderQuestion(); });
+  row.appendChild(pts); row.appendChild(nb);
+  const head = card.querySelector('.q-head');
+  if (head) head.appendChild(row); else card.appendChild(row);
+  // duplicate next-row at bottom for easy access
+  const row2 = h('div', 'next-row');
+  row2.appendChild(h('div', 'pts-gain ' + (status === 'correct' ? 'gain' : 'none'),
+                status === 'correct' ? '+10 points' : '+0 points'));
+  const nb2 = h('button', 'next-btn', state.iq + 1 >= state.list.length ? 'See results 🏆' : 'Next ➡️');
+  nb2.addEventListener('click', () => { state.iq++; if (state.iq >= state.list.length) renderResults(); else renderQuestion(); });
+  row2.appendChild(nb2);
+  card.appendChild(row2);
+}
+function answer(i){
+  const q = currentQ();
+  ensureAudio();
+  if (i === q.correctIndex) sCorrect(); else sWrong();
+  reveal(q, i === q.correctIndex ? 'correct' : 'wrong', i);
+}
+function onTimeout(token){
+  if (state.runToken !== token) return;   // stale
+  const q = currentQ();
+  ensureAudio(); sTimesUp();
+  reveal(q, 'timeout', -1);
+  speak(q.explanation);
+}
+function renderResults(){
+  state.mode = 'results';
+  stopTimer();
+  clear(elStage);
+  const card = h('div', 'card results card-in');
+  const count = state.list.length;
+  const maxPts = count * 10;
+  const words = pctWord(state.score / maxPts);
+  card.appendChild(h('div', 'big-emoji', words.emoji));
+  card.appendChild(h('h2', null, words.title));
+  card.appendChild(h('div', 'sub', 'You scored ' + state.score + ' of ' + maxPts + ' points'));
+
+  // score ring
+  const rw = h('div', 'ring-wrap');
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 120 120');
+  const bg = document.createElementNS(ns, 'circle');
+  bg.setAttribute('cx','60'); bg.setAttribute('cy','60'); bg.setAttribute('r','45'); bg.setAttribute('class','rbg');
+  const fg = document.createElementNS(ns, 'circle');
+  fg.setAttribute('cx','60'); fg.setAttribute('cy','60'); fg.setAttribute('r','45'); fg.setAttribute('class','rfg');
+  fg.id = 'ring-fg-r';
+  svg.appendChild(bg); svg.appendChild(fg);
+  rw.appendChild(svg);
+  const rs = h('div', 'rscore');
+  const n = h('div', 'n', String(state.score)); n.id = 'rscore-n'; n.className = 'n rscore-n';
+  rs.appendChild(n); rs.appendChild(h('div', 'pts', 'points'));
+  rw.appendChild(rs);
+  card.appendChild(rw);
+
+  const stars = h('div', 'stars', '⭐'.repeat(words.stars) + '☆'.repeat(5 - words.stars));
+  card.appendChild(stars);
+
+  // review
+  const review = h('div', 'review');
+  state.answers.forEach((a, i) => {
+    const f = state.list[i];
+    const row = h('div', 'review-row');
+    row.appendChild(h('div', 'qi', 'Q' + (i + 1)));
+    const body = h('div', 'qbody');
+    body.appendChild(h('div', 'qq', f.q.question));
+    const your = a.chosen >= 0 ? f.q.options[a.chosen] : 'No answer';
+    body.appendChild(h('div', 'aa', 'Your answer: ' + your));
+    body.appendChild(h('div', 'aa', '✅ ' + f.q.options[f.q.correctIndex]));
+    row.appendChild(body);
+    row.appendChild(h('div', 'pts ' + (a.pts ? 'gain' : 'none'), (a.pts ? '+' : '') + a.pts));
+    review.appendChild(row);
   });
-};
+  card.appendChild(review);
 
-window.showExamModal = function () {
-  const pool = QS.filter(q => activeCats.has(getCatKey(q)));
-  document.getElementById('examPoolSize').textContent = `当前题池：${pool.length} 题（按学科筛选）`;
-  document.getElementById('examModal').classList.add('visible');
-};
-window.hideExamModal = function () { document.getElementById('examModal').classList.remove('visible'); };
-
-window.startExam = function () {
-  hideExamModal();
-  const pool = QS.filter(q => activeCats.has(getCatKey(q))).slice();
-  if (pool.length === 0) { alert('题池为空'); return; }
-  // shuffle
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+  if (QUIZ.truncated){
+    card.appendChild(h('div', 'hint-line', 'Showing ' + QUIZ.truncated.shown + ' of ' + QUIZ.truncated.total + ' questions.'));
   }
-  examQuestions = pool.slice(0, Math.min(examConfig.count, pool.length));
-  examAnswers = {};
-  examStartTime = Date.now();
 
-  let html = '';
-  examQuestions.forEach((q, idx) => {
-    const typeInfo = TYPE_LABELS[q.type] || { txt: '', cls: '' };
-    html += `<div class="exam-q-card" id="eq-${q.id}">
-      <div class="exam-q-num">第 ${idx + 1} 题 · ${typeInfo.txt}</div>
-      <div class="exam-q-text">${renderMD(q.prompt || q.question)}</div>`;
-    if (q.type === 'single_choice') {
-      html += `<div class="exam-opts">`;
-      (q.options || []).forEach((opt, i) => {
-        const m = opt.match(/^([A-Z])[\.\、]\s*(.+)/);
-        const letter = m ? m[1] : String.fromCharCode(65 + i);
-        const text = m ? m[2] : opt;
-        html += `<div class="exam-opt" data-qid="${q.id}" data-key="${letter}" onclick="examChoose(this,${q.id},'${letter}')">
-          <span class="letter">${letter}</span><span>${renderMD(text)}</span>
-        </div>`;
-      });
-      html += `</div>`;
-    } else if (q.type === 'true_false') {
-      html += `<div class="exam-opts">
-        <div class="exam-opt" data-qid="${q.id}" data-key="True" onclick="examChoose(this,${q.id},'True')"><span class="letter">✓</span><span>正确</span></div>
-        <div class="exam-opt" data-qid="${q.id}" data-key="False" onclick="examChoose(this,${q.id},'False')"><span class="letter">✗</span><span>错误</span></div>
-      </div>`;
-    } else {
-      const tag = q.type === 'short_answer' ? 'textarea class="exam-input" rows="3"' : 'input class="exam-input"';
-      html += `<${tag} data-qid="${q.id}" oninput="examTextInput(${q.id},this.value)" placeholder="输入答案..."></${q.type === 'short_answer' ? 'textarea' : 'input'}>`;
-    }
-    html += `</div>`;
-  });
-  document.getElementById('examBody').innerHTML = html;
-  updateExamProgress();
-  document.getElementById('examOverlay').classList.add('visible');
-  document.getElementById('examSubmitBtn').disabled = false;
-  document.getElementById('examSubmitBtn').textContent = '📤 提交答卷';
+  const row2 = h('div', 'ghost-row');
+  const again = h('button', 'big-btn ghost', '🔄 Play again');
+  again.addEventListener('click', () => { burstConfetti(0); startScope(state.scope); });
+  const menu = h('button', 'big-btn ghost', '🏠 Menu');
+  menu.addEventListener('click', () => renderIntro());
+  row2.appendChild(again); row2.appendChild(menu);
+  card.appendChild(row2);
+  elStage.appendChild(card);
 
-  // 计时
-  if (examTimerInterval) clearInterval(examTimerInterval);
-  if (examConfig.timeLimit > 0) {
-    examTimeLeft = examConfig.timeLimit * examQuestions.length;
-    updateExamTimer();
-    examTimerInterval = setInterval(() => {
-      examTimeLeft--;
-      updateExamTimer();
-      if (examTimeLeft <= 0) { clearInterval(examTimerInterval); submitExam(); }
-    }, 1000);
-  } else {
-    updateElapsed();
-    examTimerInterval = setInterval(updateElapsed, 1000);
-  }
-};
-
-function updateExamTimer() {
-  const el = document.getElementById('examTimer');
-  const m = Math.floor(examTimeLeft / 60), s = examTimeLeft % 60;
-  el.textContent = '⏱ ' + m + ':' + (s < 10 ? '0' : '') + s;
-  el.style.color = examTimeLeft <= 10 ? '#ff5d77' : '';
+  // deferred: animate ring + settle score number + confetti
+  setTimeout(() => {
+    const C = 283;
+    const fgR = document.getElementById('ring-fg-r');
+    fgR.setAttribute('stroke-dashoffset', String(C * (1 - (state.score / maxPts))));
+    const num = document.getElementById('rscore-n');
+    if (num) num.textContent = String(state.score);   // settle immediately so chip & ring always agree
+    burstConfetti(140);
+    sPop();
+  }, 60);
 }
-function updateElapsed() {
-  const e = Math.floor((Date.now() - examStartTime) / 1000);
-  const m = Math.floor(e / 60), s = e % 60;
-  document.getElementById('examTimer').textContent = '⏱ ' + m + ':' + (s < 10 ? '0' : '') + s;
+function pctWord(p){
+  if (p >= 0.9)  return { emoji:'🏆', title:'Amazing!', stars:5 };
+  if (p >= 0.7)  return { emoji:'🌟', title:'Great job!', stars:4 };
+  if (p >= 0.5)  return { emoji:'😄', title:'Good try!', stars:3 };
+  if (p >= 0.3)  return { emoji:'🙂', title:'Keep going!', stars:2 };
+  return { emoji:'💪', title:'Practice makes better!', stars:1 };
+}
+function updateScore(){ elScore.textContent = '⭐ Score: ' + state.score; }
+function updateProgress(p){
+  if (elProg) elProg.style.width = Math.round(Math.max(0, Math.min(1, p)) * 100) + '%';
+  // track is shared for all-scope run; on intro show 0
 }
 
-window.examChoose = function (el, qid, key) {
-  examAnswers[qid] = key;
-  document.querySelectorAll(`#eq-${qid} .exam-opt`).forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  updateExamProgress();
-};
-window.examTextInput = function (qid, val) {
-  examAnswers[qid] = val;
-  updateExamProgress();
-};
-
-function updateExamProgress() {
-  const total = examQuestions.length;
-  const done = Object.keys(examAnswers).filter(k => String(examAnswers[k] || '').trim() !== '').length;
-  document.getElementById('examProgressText').textContent = `${done} / ${total}`;
-  document.getElementById('examProgressFill').style.width = (total > 0 ? (done / total * 100) : 0) + '%';
+// ── Mobile drawer ─────────────────────────────────────────────
+function closeDrawer(){
+  elSide.classList.remove('open'); overlay.classList.remove('open');
 }
-
-window.submitExam = function () {
-  if (examTimerInterval) clearInterval(examTimerInterval);
-  document.getElementById('examOverlay').classList.remove('visible');
-  showResults();
-};
-
-window.quitExam = function () {
-  if (!confirm('确定退出本次模拟考？答题进度会丢失')) return;
-  if (examTimerInterval) clearInterval(examTimerInterval);
-  document.getElementById('examOverlay').classList.remove('visible');
-};
-
-function showResults() {
-  let correct = 0, gradable = 0;
-  const items = [];
-  examQuestions.forEach((q, idx) => {
-    const userAns = examAnswers[q.id];
-    let isCorrect = null;
-    if (q.type === 'single_choice' || q.type === 'true_false') {
-      gradable++;
-      isCorrect = String(userAns || '').toUpperCase() === String(q.answer || '').toUpperCase();
-      if (isCorrect) correct++;
-    } else if (q.type === 'fill_blank') {
-      gradable++;
-      isCorrect = fuzzyMatch(userAns, q.answer);
-      if (isCorrect) correct++;
-    }
-    // 同步主答题状态
-    if (isCorrect === true) states[q.id] = 'mastered';
-    else if (isCorrect === false) states[q.id] = 'error';
-    if (userAns !== undefined) answered[q.id] = userAns;
-    items.push({ q, userAns, isCorrect, idx });
-  });
-  saveState();
-  applyStatesToDOM();
-  applyFilters();
-
-  const score = gradable > 0 ? Math.round(correct / gradable * 100) : 0;
-  const passed = score >= 60;
-  const scoreEl = document.getElementById('resultsScore');
-  scoreEl.textContent = score;
-  scoreEl.className = 'results-score ' + (passed ? 'pass' : 'fail');
-  document.getElementById('resultsDetail').textContent =
-    `${examQuestions.length} 题 · 答对 ${correct}/${gradable}${gradable < examQuestions.length ? ` · ${examQuestions.length - gradable} 题需自评` : ''}`;
-
-  let html = '';
-  items.forEach(it => {
-    const { q, userAns, isCorrect, idx } = it;
-    const cls = isCorrect === true ? 'is-correct' : isCorrect === false ? 'is-wrong' : '';
-    const badge = isCorrect === true
-      ? '<span class="result-badge correct">✓ 正确</span>'
-      : isCorrect === false
-      ? '<span class="result-badge wrong">✗ 错误</span>'
-      : '<span class="result-badge" style="background:#fff4e0;color:#e9a82c;">📝 待自评</span>';
-
-    let ansHtml = '';
-    if (q.type === 'single_choice' || q.type === 'true_false' || q.type === 'fill_blank') {
-      if (isCorrect) {
-        ansHtml = `<div class="result-answers">✓ 你答：<span class="correct-ans">${escapeHtml(String(userAns || ''))}</span></div>`;
-      } else {
-        ansHtml = `<div class="result-answers">你答：<span class="wrong-ans">${escapeHtml(String(userAns || '（未作答）'))}</span> · 正确答案：<span class="correct-ans">${renderMD(String(q.answer || ''))}</span></div>`;
-      }
-    } else {
-      ansHtml = `<div class="result-answers">你答：${escapeHtml(String(userAns || '（未作答）'))}</div>
-        <div class="result-answers">参考：<span class="correct-ans">${renderMD(String(q.answer || ''))}</span></div>`;
-    }
-
-    html += `<div class="result-item ${cls}">
-      <div class="result-top">
-        <span class="result-qid">第${idx + 1}题 · Q${q.id}</span>
-        ${badge}
-      </div>
-      <div class="result-text">${renderMD(q.prompt || q.question)}</div>
-      ${ansHtml}
-      ${q.explanation ? `<div class="result-analysis">💡 ${renderMD(q.explanation)}</div>` : ''}
-      ${q.memory_tip ? `<div class="result-tip">🧠 ${renderMD(q.memory_tip)}</div>` : ''}
-    </div>`;
-  });
-  document.getElementById('resultsBody').innerHTML = html;
-  document.getElementById('examResults').classList.add('visible');
-}
-
-window.closeResults = function () { document.getElementById('examResults').classList.remove('visible'); };
-window.retakeExam = function () { closeResults(); startExam(); };
-
-/* ===== 工具 ===== */
-function escapeHtml(s) {
-  if (s === null || s === undefined) return '';
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-function renderMD(s) {
-  if (s === null || s === undefined) return '';
-  return escapeHtml(s)
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/\n/g, '<br>')
-    .replace(/____+/g, '<span style="display:inline-block;min-width:80px;border-bottom:2px solid currentColor;margin:0 4px;opacity:.5;">&nbsp;</span>');
-}
-
-/* ===== 键盘快捷键 ===== */
-document.addEventListener('keydown', (e) => {
-  // 在 input/textarea 内时，只允许 Enter 触发提交，其它不拦截
-  const inExam = document.getElementById('examOverlay').classList.contains('visible');
-  const inResults = document.getElementById('examResults').classList.contains('visible');
-  const inModal = document.querySelector('.modal-overlay.visible');
-  if (inExam || inResults || inModal) {
-    // 模拟考也支持 Enter 提交
-    if (inExam && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      submitExam();
-    }
-    return;
-  }
-
-  const tag = (e.target.tagName || '').toLowerCase();
-  const inField = tag === 'input' || tag === 'textarea';
-
-  // Enter 提交（在文本框里只有 Ctrl/Cmd+Enter）
-  if (e.key === 'Enter') {
-    if (inField && !(e.ctrlKey || e.metaKey)) return;
-    e.preventDefault();
-    const btn = document.getElementById('btnSubmit');
-    if (btn && !btn.disabled) btn.click();
-    return;
-  }
-
-  if (inField) return;  // 文本框内不再处理其它快捷键
-
-  // A/B/C/D 选项
-  if (/^[a-dA-D]$/.test(e.key)) {
-    const letter = e.key.toUpperCase();
-    const el = document.querySelector(`#qOpts .opt[data-key="${letter}"]`);
-    if (el && !el.classList.contains('disabled')) { el.click(); e.preventDefault(); }
-    return;
-  }
-  // T/F 判断题
-  if (e.key === 't' || e.key === 'T') {
-    const el = document.querySelector('#qOpts .opt[data-key="True"]');
-    if (el && !el.classList.contains('disabled')) { el.click(); e.preventDefault(); }
-    return;
-  }
-  if (e.key === 'f' || e.key === 'F') {
-    const el = document.querySelector('#qOpts .opt[data-key="False"]');
-    if (el && !el.classList.contains('disabled')) { el.click(); e.preventDefault(); }
-    return;
-  }
-  // 上下题
-  if (e.key === 'ArrowLeft') { goPrev(); e.preventDefault(); return; }
-  if (e.key === 'ArrowRight') { goNext(); e.preventDefault(); return; }
-  // Space: 查看答案
-  if (e.key === ' ') {
-    if (currentId !== null) { revealAnswer(currentId); e.preventDefault(); }
-    return;
-  }
+document.getElementById('hamburger').addEventListener('click', () => {
+  elSide.classList.toggle('open'); overlay.classList.toggle('open');
+});
+overlay.addEventListener('click', closeDrawer);
+document.getElementById('sidebar-home').addEventListener('click', () => { closeDrawer(); renderIntro(); });
+elMute.addEventListener('click', () => {
+  muted = !muted;
+  elMute.textContent = muted ? '🔇' : '🔊';
+  if (muted && 'speechSynthesis' in window) speechSynthesis.cancel();
 });
 
-document.addEventListener('DOMContentLoaded', init);
+// ── Boot ──────────────────────────────────────────────────────
+renderTree();
+renderIntro();
+})();
 </script>
-
 </body>
 </html>
